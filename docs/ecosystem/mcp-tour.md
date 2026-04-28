@@ -15,23 +15,25 @@ underneath.
 > opening the browser. Operators still drive the autonomous loop from
 > [Derive](../derive/) — that part has no MCP surface.
 
-## Setup — wire all three MCP servers into Claude Desktop
+## Setup — wire the MCP servers into Claude Desktop
 
-Add this to your `claude_desktop_config.json`
+Each of the three MCP-enabled components has a different wiring story
+today. Reify is published as a ready-to-go npm package; AIRGen's MCP
+server is in-tree but not yet on npm; UHT Substrate's MCP server is
+the Python service itself. The configurations below reflect that.
+
+Add the relevant blocks to `claude_desktop_config.json`
 (`~/Library/Application Support/Claude/claude_desktop_config.json` on
-macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows):
+macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows).
+
+### Reify — ready, via npm
+
+The `@derive-ltd/reify` package ships an MCP stdio server (the
+`reify-mcp` bin), tested with Claude Desktop:
 
 ```json
 {
   "mcpServers": {
-    "airgen": {
-      "command": "npx",
-      "args": ["-y", "@derive-ltd/airgen-cli", "mcp"],
-      "env": {
-        "AIRGEN_API_URL": "https://airgen.studio/api",
-        "AIRGEN_API_TOKEN": "your-airgen-token"
-      }
-    },
     "reify": {
       "command": "npx",
       "args": ["-y", "@derive-ltd/reify"],
@@ -39,33 +41,94 @@ macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows):
         "REIFY_API_URL": "https://reify.airgen.studio",
         "REIFY_API_TOKEN": "rfy_paste_your_token_here"
       }
-    },
-    "uht-substrate": {
-      "command": "npx",
-      "args": ["-y", "@derive-ltd/uht-substrate", "mcp"],
+    }
+  }
+}
+```
+
+Token generation is described in the
+[Reify documentation](../reify/).
+
+### AIRGen — local build for now
+
+The AIRGen MCP server lives in
+[`packages/mcp-server`](https://github.com/Hollando78/airgen/tree/main/packages/mcp-server)
+of the AIRGen repo but **is not yet published to npm**. To wire it
+into Claude Desktop today, build the source locally and point
+Claude Desktop at the resulting binary:
+
+```json
+{
+  "mcpServers": {
+    "airgen": {
+      "command": "node",
+      "args": ["/absolute/path/to/airgen/packages/mcp-server/dist/index.js"],
       "env": {
-        "UHT_API_URL": "https://substrate.universalhex.org/api",
-        "UHT_API_TOKEN": "your-substrate-token"
+        "AIRGEN_API_URL": "https://api.airgen.studio/api",
+        "AIRGEN_API_KEY": "your-airgen-api-key"
       }
     }
   }
 }
 ```
 
-Restart Claude Desktop. You should now see ~90 tools across three
-servers in the tool picker:
+Required environment:
 
-- **`airgen`** — 70 tools across 18 modules
-- **`reify`** — ~19 tools (read-only)
-- **`uht-substrate`** — classification, entity management, fact CRUD,
-  semantic search, namespace tools
+- `AIRGEN_API_URL` — base URL (note the `api.` subdomain on production:
+  `https://api.airgen.studio/api`)
+- Either `AIRGEN_API_KEY` (preferred), or `AIRGEN_EMAIL` +
+  `AIRGEN_PASSWORD` for password-based login
 
-> Verify the exact CLI invocation and env-var names against the
-> upstream package READMEs ([airgen](https://github.com/Hollando78/airgen),
-> [reify](https://github.com/Hollando78/reify),
-> [uht-substrate](https://github.com/Hollando78/uht-substrate)) — the
-> command lines above match the published packages at the time of
-> writing but may evolve.
+The CLI package `@derive-ltd/airgen-cli` (or its legacy unscoped name
+`airgen-cli`) is a **REST/CLI client only** — it does not embed an
+MCP server.
+
+### UHT Substrate — Python install
+
+UHT Substrate's MCP server is the Python service itself. Self-host
+the substrate, then point Claude Desktop at the resulting binary:
+
+```sh
+# from the substrate source
+pip install -e .
+```
+
+Then in `claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "uht-substrate": {
+      "command": "/absolute/path/to/.venv/bin/uht-substrate",
+      "env": {
+        "UHT_NEO4J_PASSWORD": "...",
+        "UHT_API_BASE_URL": "https://factory.universalhex.org/api/v1",
+        "UHT_API_KEY": "your-factory-token"
+      }
+    }
+  }
+}
+```
+
+`uht-substrate` runs in MCP mode by default; pass `--web` instead to
+serve REST + MCP over HTTP. The npm package
+`@derive-ltd/uht-substrate` is a REST CLI client and does not embed
+an MCP server.
+
+### Verifying the wiring
+
+Restart Claude Desktop. You should see new tools in the tool picker:
+
+- **`reify`** — ~19 read-only tools (verified)
+- **`airgen`** — 70 tools across 18 modules (once built and wired)
+- **`uht-substrate`** — classification, entity, fact, namespace tools
+  (once Python install is wired)
+
+Wiring details can move — verify against the upstream READMEs
+([airgen](https://github.com/Hollando78/airgen),
+[reify](https://github.com/Hollando78/reify),
+[uht-substrate](https://github.com/Hollando78/uht-substrate)) before
+quoting these blocks.
 
 ## The tour
 
@@ -144,13 +207,14 @@ component's classification is sensible.
 > *"For project `widget-x`, list every hazard, the requirements that
 > mitigate it, and the verification activities for each requirement."*
 
-Touches: Substrate `query_facts` (`HAS_HAZARD`, `MITIGATED_BY`),
-AIRGen `requirements` and `verification` modules.
+Touches: Substrate `query_facts` (e.g. `HAS_HAZARD` predicates),
+AIRGen `requirements`, `traceability`, and `verification` modules.
 
 This is a genuinely cross-server query — hazards live as substrate
-facts; requirements and verification live in AIRGen. Claude resolves
-the join. The same view in the browser is Reify's `/saf` (safety)
-diagram.
+facts; the mitigating relationship is typically an AIRGen trace link
+(`satisfies` or `verifies`) between the requirement and the hazard;
+verification activities live in AIRGen too. Claude resolves the join.
+The same view in the browser is Reify's `/saf` (safety) diagram.
 
 ### 8. "Draft candidate requirements from this stakeholder need"
 
