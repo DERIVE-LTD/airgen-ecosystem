@@ -1,55 +1,94 @@
 # Getting started with Derive
 
-Derive is the autonomous workbench layered on top of [AIRGen](../airgen/).
-This guide walks through running your first agent flow against a project.
+Derive is the operator workbench for AIRGen projects. This guide walks
+through opening a project, reading the dashboard, and using the
+quality view, journal, and loop controls.
 
 > **Prerequisites:**
 >
-> - An AIRGen account ([airgen.studio](https://airgen.studio) or self-hosted)
-> - A project in AIRGen with at least one stakeholder requirement
-> - A Derive account at [derive.airgen.studio](https://derive.airgen.studio)
+> - Access to [derive.airgen.studio](https://derive.airgen.studio) (or
+>   a self-hosted Derive instance)
+> - A GitHub or Google account for OAuth sign-in
+> - At least one project visible to your account
 
-## 1. Connect Derive to your AIRGen tenant
+If you just want to look around without signing in, the public
+read-only demo lives at `/demo`.
 
-_TODO: walkthrough — selecting the AIRGen tenant, providing API
-credentials, confirming the connection._
+## 1. Sign in
 
-## 2. Open a project in Derive
+Sign in with GitHub or Google. An admin must associate your account
+with the projects you should see.
 
-Derive lists projects from the connected AIRGen tenant. Open one to see
-its current requirements, trace links, and previous agent sessions.
+_TODO: screenshot of the sign-in screen._
 
-_TODO: screenshot of the project view._
+## 2. Open a project
 
-## 3. Run a decomposition flow
+Each project lives at `/p/<slug>/`. From the project landing page,
+the most useful starting tabs are:
 
-From the project page, choose **Run flow → Decompose**. Derive launches
-an agent session that:
+- **Dashboard** — spec-tree, headline metrics, safety-regime card.
+- **Quality** — lint findings, orphans, ambiguous requirements, gate state.
+- **Journal** — session-log feed for this project.
+- **Report** — long-form generated report.
 
-1. Reads the stakeholder requirement(s) and any existing context
-2. Proposes system-level requirements with rationale
-3. Suggests trace links between the new requirements and the source
-4. Writes the proposed artefacts back to AIRGen as **candidates**
+_TODO: screenshot of the per-project dashboard._
 
-_TODO: screenshot of a running session with live progress._
+## 3. Read the dashboard
 
-## 4. Review and accept candidates
+The dashboard is the single-screen overview: the spec-tree on the left,
+key metrics in the middle, and a safety-regime card that tells you
+which standard the project is being evaluated against (tool-qualification,
+SIL-rated, etc.). Use it to sanity-check that the project's data is
+coherent before drilling into details.
 
-All agent output lands in AIRGen as candidates — you can accept,
-reject, or edit each item before it becomes part of the live data set.
-This human-in-the-loop gate is intentional: in regulated contexts,
-agent-drafted artefacts must be reviewed by a competent engineer.
+## 4. Read the quality view
 
-_TODO: screenshot of the candidate review UI._
+`/p/<slug>/quality` shows everything that needs human attention:
 
-## 5. Generate a report
+- Lint failures against AIRGen QA rules
+- Requirements with no incoming or outgoing trace links (orphans)
+- Ambiguous or under-specified requirements
+- Whether the project meets the current quality gate
 
-Once you have a tidy set of accepted requirements and trace links,
-choose **Generate report** to produce a structured engineering report.
-Reports are versioned alongside the project.
+This is where you decide whether the autonomous loop's most recent
+output is ready to ship, needs another iteration, or needs a directive.
+
+## 5. Drive the autonomous loop
+
+The autonomous loop is run by a Claude-driven orchestrator behind
+Derive (the Claude Harness). Derive exposes the controls:
+
+- `/control` — global pause / unpause and directive submission
+- `/p/<slug>/control` — per-project loop controls
+
+Use these to pause the loop while you review, submit a directive
+("focus on hazard analysis next"), or unpause once you're happy.
+
+_TODO: screenshot of the loop control panel._
+
+## 6. Read the journal
+
+Each loop session writes a markdown post to the journal. Derive renders
+those posts at:
+
+- `/journal` — cross-project feed
+- `/p/<slug>/journal` — per-project feed
+- `/p/<slug>/journal/<entry>` — single post
+
+This is the human-readable narrative of what the loop did and why.
+
+## 7. Export an artefact bundle
+
+When you have a stable point — typically a baselined release — open
+**Artifacts** or **Downloads** on the project. You can export:
+
+- Word and PDF reports
+- Excel exports of requirements
+- Zipped artefact bundles for delivery or audit
 
 ## Next steps
 
-- _TODO: link to "Understanding agent flows" guide_
-- _TODO: link to "Custom flow definitions" guide_
+- _TODO: link to "Reading the per-project dashboard"_
+- _TODO: link to "The quality view: lint findings, orphans, gate state"_
+- _TODO: link to "Working with baselines and artefact bundles"_
 - _TODO: link to ecosystem overview_

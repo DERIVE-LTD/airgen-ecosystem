@@ -1,43 +1,57 @@
 # AIRGen Ecosystem
 
-Technical guides for the [Derive Ltd](https://derive-ltd.co.uk) product suite —
-**AIRGen**, **Derive**, and **Reify** — an integrated platform for
-AI-assisted, model-based systems engineering in regulated industries.
+Technical guides for the [Derive Ltd](https://derive-ltd.co.uk)
+autonomous-systems-engineering platform — five components, one
+pipeline.
 
-This repository is the canonical home for hands-on technical documentation.
-For product overviews, contact information, and commercial enquiries, see
-[derive-ltd.co.uk](https://derive-ltd.co.uk).
+This repository is the canonical home for hands-on technical
+documentation. For product overviews, contact information, and
+commercial enquiries, see [derive-ltd.co.uk](https://derive-ltd.co.uk).
 
-## The products
+## The components
 
-| Product   | One-liner                                                                                          | Hosted at                                          | Docs                                       |
-| --------- | -------------------------------------------------------------------------------------------------- | -------------------------------------------------- | ------------------------------------------ |
-| **AIRGen** | AI-powered requirements engineering platform — QA scoring, traceability, diagrams, drafting.       | [airgen.studio](https://airgen.studio)             | [`docs/airgen/`](docs/airgen/)             |
-| **Derive** | Autonomous systems-engineering workbench — requirements decomposition, reports, and traceability.   | [derive.airgen.studio](https://derive.airgen.studio) | [`docs/derive/`](docs/derive/)             |
-| **Reify**  | SysML v2 model viewer and editor — fourteen views with live editor, HTTP + MCP APIs.                | [reify.airgen.studio](https://reify.airgen.studio) | [`docs/reify/`](docs/reify/)               |
+The platform is built around three user-facing applications and two
+infrastructure layers:
 
-For how the three fit together, see the [ecosystem overview](docs/ecosystem/overview.md).
+### User-facing applications
+
+| Component  | One-liner                                                                                          | Hosted at                                              | Docs                                       |
+| ---------- | -------------------------------------------------------------------------------------------------- | ------------------------------------------------------ | ------------------------------------------ |
+| **AIRGen** | AI-powered requirements engineering platform — QA scoring, traceability, diagrams, drafting.       | [airgen.studio](https://airgen.studio)                 | [`docs/airgen/`](docs/airgen/)             |
+| **Derive** | Operator workbench — spec-tree dashboard, journal, quality view, loop controls.                    | [derive.airgen.studio](https://derive.airgen.studio)   | [`docs/derive/`](docs/derive/)             |
+| **Reify**  | SysML v2 model viewer and editor — fourteen views, live editor, HTTP + MCP APIs.                   | [reify.airgen.studio](https://reify.airgen.studio)     | [`docs/reify/`](docs/reify/)               |
+
+### Infrastructure
+
+| Component         | One-liner                                                                                  | Hosted at                                                          | Docs                                                 |
+| ----------------- | ------------------------------------------------------------------------------------------ | ------------------------------------------------------------------ | ---------------------------------------------------- |
+| **UHT Substrate** | Semantic-reasoning engine and namespaced fact store — the project knowledge graph.         | [substrate.universalhex.org](https://substrate.universalhex.org)   | [`docs/uht-substrate/`](docs/uht-substrate/)         |
+| **Claude Harness** | Autonomous Claude Code session orchestrator — runs the loop behind Derive. _(Source private.)_ | _(internal)_                                                       | [`docs/claude-harness/`](docs/claude-harness/)       |
+
+For how the five fit together, see the [ecosystem overview](docs/ecosystem/overview.md).
 
 ## Repository layout
 
 ```
 docs/
-├── airgen/      Guides for AIRGen
-├── derive/      Guides for Derive
-├── reify/       Guides for Reify
-└── ecosystem/   Cross-cutting topics — how the products integrate
+├── airgen/         Guides for AIRGen
+├── derive/         Guides for Derive
+├── reify/          Guides for Reify
+├── uht-substrate/  Guides for UHT Substrate
+├── claude-harness/ Guides for the Claude Harness (operator-facing)
+└── ecosystem/      Cross-cutting topics — how the components integrate
 ```
 
-Each product directory contains:
+Each component directory contains:
 
-- `README.md` — product overview and a guide index
+- `README.md` — overview and a guide index
 - `getting-started.md` — first-run walkthrough
 - `guides/` — task-oriented technical guides
 
 ## Contributing
 
-Issues and pull requests are welcome. For substantive changes please open
-an issue first to discuss scope. We particularly welcome:
+Issues and pull requests are welcome. For substantive changes please
+open an issue first to discuss scope. We particularly welcome:
 
 - Real-world usage examples and case studies
 - Corrections and clarifications
