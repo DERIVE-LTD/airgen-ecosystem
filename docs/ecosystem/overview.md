@@ -4,52 +4,61 @@ The AIRGen ecosystem is five components working as one pipeline for
 AI-assisted, model-based systems engineering in regulated industries.
 
 ```
-                       ┌────────────────────────────┐
-                       │      STAKEHOLDER NEEDS     │
-                       │  (prose, docs, dialogue)   │
-                       └────────────┬───────────────┘
-                                    │
-                                    ▼
-                       ┌────────────────────────────┐
-                       │       CLAUDE HARNESS       │   Autonomous engine
-                       │  (autonomous orchestrator) │   · concept → scaffold
-                       │   private; runs the loop   │   · decompose → QC
-                       │                            │   · validate → review
-                       └────────┬─────────┬─────────┘
-                                │         │ writes facts
-                                │         ▼
-                                │  ┌──────────────────┐
-                                │  │  UHT SUBSTRATE   │  Knowledge graph
-                                │  │  (fact store +   │  · 32-bit taxonomy
-                                │  │   semantic       │  · namespaced facts
-                                │  │   reasoning)     │  · MCP / REST / CLI
-                                │  └──────────────────┘
-                                │
-                       writes reqs +
-                       trace links
-                                │
-                                ▼
-                       ┌────────────────────────────┐
-                       │           AIRGEN           │   System of record
-                       │  (requirements platform)   │   · ISO 29148 / EARS QA
-                       │                            │   · trace, baselines
-                       │                            │   · CLI / MCP / API
-                       └────────────┬───────────────┘
-                                    │
-                       reads, supervises, exports
-                                    │
-                          ┌─────────┴────────┐
-                          ▼                  ▼
-                ┌──────────────────┐  ┌──────────────────┐
-                │      DERIVE      │  │      REIFY       │
-                │ Operator        │  │ SysML v2 viewer  │
-                │ workbench       │  │ + editor         │
-                │ · dashboard     │  │ · 14 views       │
-                │ · journal       │  │ · live editor    │
-                │ · quality view  │  │ · HTTP + MCP API │
-                │ · loop controls │  │                  │
-                └──────────────────┘  └──────────────────┘
+                                ┌──────────┐
+                                │   USER   │
+                                └─────┬────┘
+                                      │ OAuth (browser)
+                                      ▼
+                       ┌─────────────────────────────┐
+                       │            DERIVE           │  Operator workbench
+                       │   The only UI to the loop   │  · dashboard
+                       │                             │  · journal
+                       │                             │  · quality view
+                       │                             │  · loop controls
+                       └────────┬──────────────┬─────┘
+                                │              │
+                       controls │              │ reads back
+                                ▼              │
+                       ┌─────────────────┐     │
+                       │  CLAUDE HARNESS │     │
+                       │   Autonomous    │     │
+                       │ engine; no UI   │     │
+                       │ · concept → ... │     │
+                       │ · ... → review  │     │
+                       └────┬────────┬───┘     │
+                            │        │         │
+                            │        │         │
+                     writes │        │ writes  │
+                     reqs + │        │ facts   │
+                     traces │        │ (SE:    │
+                            │        │ slug)   │
+                            ▼        ▼         │
+                   ┌─────────────┐  ┌──────────────────┐
+                   │   AIRGEN    │  │  UHT SUBSTRATE   │
+                   │ System of   │  │  Knowledge graph │ ◀── Derive reads
+                   │ record      │  │ · 32-bit taxonomy│      both stores
+                   │ · QA / EARS │  │ · namespaced     │      to render its
+                   │ · trace     │  │   facts          │      views
+                   │ · baselines │  │ · MCP/REST/CLI   │
+                   └──────┬──────┘  └────────┬─────────┘
+                          │                  │
+                          └────────┬─────────┘
+                                   │ both read by
+                                   ▼
+                       ┌─────────────────────────────┐
+                       │            REIFY            │  SysML v2 viewer
+                       │   Reads AIRGen + Substrate, │  · 14 views
+                       │   reconstructs SysML v2,    │  · live editor
+                       │   renders 14 views          │  · HTTP + MCP API
+                       └─────────────────────────────┘
 ```
+
+The harness has no user interface of its own. Every operator action —
+pause the loop, unpause, submit a directive, review what was produced
+— happens through Derive. The harness writes to AIRGen, UHT Substrate,
+and the journal filesystem; Derive reads back from all three to render
+the operator view; Reify reads AIRGen and UHT Substrate to render the
+SysML v2 view.
 
 ## What each component owns
 
@@ -84,8 +93,9 @@ multi-template pipeline (concept, scaffold, decompose, QC, validate,
 review), and writes its output into AIRGen and UHT Substrate plus a
 journal post for human review.
 
-The harness has no UI of its own — it is driven from Derive's loop
-control panel. Its source is private; this docs hub describes only
+The harness has **no UI of its own**. Every operator interaction goes
+through Derive: pause and unpause, directives, and review of what each
+session produced. Its source is private; this docs hub describes only
 its public-facing role within the ecosystem.
 
 ### Derive — operator workbench
@@ -103,12 +113,14 @@ before they enter the live data set.
 
 ### Reify — SysML v2 visualisation
 
-Reify reads each project's SysML v2 source, parses it once, and renders
-it as fourteen views — structural, behavioural, requirements, safety,
-and tabular. The SysML editor is live: edit the source, switch to a
-diagram view, see the change. Reify also exposes an HTTP API and an MCP
-server, and is built on top of `sysml-reactflow`, an open-source React
-library for SysML v2 visualisation.
+Reify reads each project's data directly from **AIRGen** (requirements,
+trace links) and **UHT Substrate** (facts) and reconstructs the
+canonical SysML v2 source from both. It then renders fourteen views —
+structural, behavioural, requirements, safety, and tabular. The SysML
+editor is live: edit the source, switch to a diagram view, see the
+change. Reify also exposes an HTTP API and an MCP server, and is built
+on top of `sysml-reactflow`, an open-source React library for SysML v2
+visualisation.
 
 ## How they integrate
 
@@ -116,10 +128,11 @@ library for SysML v2 visualisation.
 | ------------------------------ | -------------------------------------------------------------------------- |
 | Harness ↔ AIRGen              | AIRGen REST API — the harness writes requirements and trace links.         |
 | Harness ↔ UHT Substrate       | Substrate REST / MCP — the harness writes namespaced facts.                |
-| Harness ↔ Derive              | The harness writes journal markdown and SurrealDB session records that Derive reads. |
+| Harness ↔ Derive              | The harness writes journal markdown and SurrealDB session records that Derive reads. The harness has **no direct UI** — Derive is the operator interface. |
 | Derive ↔ AIRGen               | AIRGen REST API for projects, requirements, baselines.                     |
 | Derive ↔ UHT Substrate        | Substrate REST API for the spec-tree and namespace queries.                |
-| Reify ↔ AIRGen / Substrate    | Reify reads each project's SysML v2 source (reconstructed from substrate facts and AIRGen requirements) and parses it client-side. |
+| Reify ↔ AIRGen                | Reify reads requirements and trace links via the AIRGen REST API.          |
+| Reify ↔ UHT Substrate         | Reify reads namespaced facts via the Substrate REST API and reconstructs the canonical SysML v2 source from AIRGen + Substrate combined. |
 | Cross-app linking              | URL-based deep links between Derive, AIRGen, and Reify.                    |
 
 ## Adoption paths

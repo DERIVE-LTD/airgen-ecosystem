@@ -2,11 +2,13 @@
 
 **SysML v2 model viewer and editor.**
 
-Reify renders structural, behavioural, and requirements diagrams
-straight from a project's SysML v2 source. It pairs a CodeMirror
-editor for the SysML text with React Flow + ELK auto-layout for the
-diagrams, and exposes the same data through both an HTTP API and an
-MCP server for programmatic and agentic access.
+Reify reads requirements and trace links from [AIRGen](../airgen/) and
+namespaced facts from [UHT Substrate](../uht-substrate/), reconstructs
+the canonical SysML v2 source from both, and renders structural,
+behavioural, and requirements diagrams. It pairs a CodeMirror editor
+for the SysML text with React Flow + ELK auto-layout for the diagrams,
+and exposes the same data through both an HTTP API and an MCP server
+for programmatic and agentic access.
 
 - **Hosted:** [reify.airgen.studio](https://reify.airgen.studio)
 - **Stack:** Next.js 16 (App Router) on React 19, Tailwind 4,
