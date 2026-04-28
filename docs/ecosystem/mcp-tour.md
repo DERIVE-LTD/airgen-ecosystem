@@ -15,21 +15,15 @@ underneath.
 > opening the browser. Operators still drive the autonomous loop from
 > [Derive](../derive/) — that part has no MCP surface.
 
-## Setup — wire the MCP servers into Claude Desktop
+## Setup — wire the three MCP servers into Claude Desktop
 
-Each of the three MCP-enabled components has a different wiring story
-today. Reify is published as a ready-to-go npm package; AIRGen's MCP
-server is in-tree but not yet on npm; UHT Substrate's MCP server is
-the Python service itself. The configurations below reflect that.
-
-Add the relevant blocks to `claude_desktop_config.json`
+Two of the three components ship as `npx`-installable packages on
+npm; UHT Substrate is reached over HTTP at the hosted endpoint. Add
+the three blocks below into `claude_desktop_config.json`
 (`~/Library/Application Support/Claude/claude_desktop_config.json` on
 macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows).
 
-### Reify — ready, via npm
-
-The `@derive-ltd/reify` package ships an MCP stdio server (the
-`reify-mcp` bin), tested with Claude Desktop:
+### Reify — `@derive-ltd/reify`
 
 ```json
 {
@@ -46,23 +40,22 @@ The `@derive-ltd/reify` package ships an MCP stdio server (the
 }
 ```
 
-Token generation is described in the
-[Reify documentation](../reify/).
+`@derive-ltd/reify` ships two bins (`reify-mcp` for the MCP server,
+`reify` for the CLI). The default invocation runs the MCP server.
+Token generation is described in the [Reify docs](../reify/).
 
-### AIRGen — local build for now
+### AIRGen — `@derive-ltd/airgen-cli`
 
-The AIRGen MCP server lives in
-[`packages/mcp-server`](https://github.com/Hollando78/airgen/tree/main/packages/mcp-server)
-of the AIRGen repo but **is not yet published to npm**. To wire it
-into Claude Desktop today, build the source locally and point
-Claude Desktop at the resulting binary:
+As of v1.1.0 (April 2026), `@derive-ltd/airgen-cli` bundles the
+AIRGen MCP server alongside the CLI. The MCP server lives at the
+`airgen-mcp` bin:
 
 ```json
 {
   "mcpServers": {
     "airgen": {
-      "command": "node",
-      "args": ["/absolute/path/to/airgen/packages/mcp-server/dist/index.js"],
+      "command": "npx",
+      "args": ["-y", "-p", "@derive-ltd/airgen-cli", "airgen-mcp"],
       "env": {
         "AIRGEN_API_URL": "https://api.airgen.studio/api",
         "AIRGEN_API_KEY": "your-airgen-api-key"
@@ -74,61 +67,71 @@ Claude Desktop at the resulting binary:
 
 Required environment:
 
-- `AIRGEN_API_URL` — base URL (note the `api.` subdomain on production:
-  `https://api.airgen.studio/api`)
-- Either `AIRGEN_API_KEY` (preferred), or `AIRGEN_EMAIL` +
-  `AIRGEN_PASSWORD` for password-based login
+- `AIRGEN_API_URL` — base URL. Note the `api.` subdomain in production
+  (`https://api.airgen.studio/api`).
+- Either `AIRGEN_API_KEY` (preferred) or `AIRGEN_EMAIL` +
+  `AIRGEN_PASSWORD` for password-based login.
 
-The CLI package `@derive-ltd/airgen-cli` (or its legacy unscoped name
-`airgen-cli`) is a **REST/CLI client only** — it does not embed an
-MCP server.
+The `-p @derive-ltd/airgen-cli airgen-mcp` form tells `npx` to
+install the CLI package and run its second bin.
 
-### UHT Substrate — Python install
+### UHT Substrate — hosted HTTP endpoint
 
-UHT Substrate's MCP server is the Python service itself. Self-host
-the substrate, then point Claude Desktop at the resulting binary:
-
-```sh
-# from the substrate source
-pip install -e .
-```
-
-Then in `claude_desktop_config.json`:
+UHT Substrate exposes a hosted MCP endpoint at
+`https://substrate.universalhex.org/mcp` over HTTP-streamable
+transport, authenticated by a Bearer token. The canonical config is
+shipped in the substrate repo at [`cli/mcp.json`](https://github.com/Hollando78/uht-substrate/blob/main/cli/mcp.json):
 
 ```json
 {
   "mcpServers": {
     "uht-substrate": {
-      "command": "/absolute/path/to/.venv/bin/uht-substrate",
-      "env": {
-        "UHT_NEO4J_PASSWORD": "...",
-        "UHT_API_BASE_URL": "https://factory.universalhex.org/api/v1",
-        "UHT_API_KEY": "your-factory-token"
+      "url": "https://substrate.universalhex.org/mcp",
+      "transport": "streamable-http",
+      "headers": {
+        "Authorization": "Bearer ${UHT_TOKEN}"
       }
     }
   }
 }
 ```
 
-`uht-substrate` runs in MCP mode by default; pass `--web` instead to
-serve REST + MCP over HTTP. The npm package
-`@derive-ltd/uht-substrate` is a REST CLI client and does not embed
-an MCP server.
+Set `UHT_TOKEN` in your shell environment (or substitute the literal
+token into the header). Get a token by signing in with Google or
+GitHub at [substrate.universalhex.org](https://substrate.universalhex.org).
+
+> Older Claude Desktop versions don't support `streamable-http`
+> transports natively. If your client is stdio-only, use `mcp-remote`
+> (or an equivalent bridge) to convert the HTTP endpoint to stdio:
+>
+> ```json
+> {
+>   "command": "npx",
+>   "args": [
+>     "-y", "mcp-remote",
+>     "https://substrate.universalhex.org/mcp",
+>     "--header", "Authorization: Bearer your-uht-token"
+>   ]
+> }
+> ```
+
+The `@derive-ltd/uht-substrate` npm package is a **REST CLI client**
+— it doesn't embed an MCP server. The hosted endpoint is the canonical
+MCP path for the substrate.
 
 ### Verifying the wiring
 
-Restart Claude Desktop. You should see new tools in the tool picker:
+Restart Claude Desktop. The tool picker should now show:
 
-- **`reify`** — ~19 read-only tools (verified)
-- **`airgen`** — 70 tools across 18 modules (once built and wired)
+- **`reify`** — ~19 read-only tools
+- **`airgen`** — 70 tools across 18 modules
 - **`uht-substrate`** — classification, entity, fact, namespace tools
-  (once Python install is wired)
 
-Wiring details can move — verify against the upstream READMEs
+Wiring details can move — when in doubt, check the upstream READMEs
 ([airgen](https://github.com/Hollando78/airgen),
 [reify](https://github.com/Hollando78/reify),
-[uht-substrate](https://github.com/Hollando78/uht-substrate)) before
-quoting these blocks.
+[uht-substrate](https://github.com/Hollando78/uht-substrate)) for the
+current invocation.
 
 ## The tour
 
