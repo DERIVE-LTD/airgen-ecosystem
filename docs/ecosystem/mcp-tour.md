@@ -117,8 +117,8 @@ TLS-terminating reverse proxy and require authentication.
 
 UHT Substrate exposes a hosted MCP endpoint at
 `https://substrate.universalhex.org/mcp` over HTTP-streamable
-transport, authenticated by a Bearer token. The canonical config is
-shipped in the substrate repo at [`cli/mcp.json`](https://github.com/Hollando78/uht-substrate/blob/main/cli/mcp.json):
+transport, authenticated by a Bearer token. The canonical config
+(`cli/mcp.json`):
 
 ```json
 {
@@ -165,11 +165,8 @@ Restart Claude Desktop. The tool picker should now show:
 - **`airgen`** — 70 tools across 18 modules
 - **`uht-substrate`** — classification, entity, fact, namespace tools
 
-Wiring details can move — when in doubt, check the upstream READMEs
-([airgen](https://github.com/Hollando78/airgen),
-[reify](https://github.com/Hollando78/reify),
-[uht-substrate](https://github.com/Hollando78/uht-substrate)) for the
-current invocation.
+Wiring details can move — when in doubt, check the current invocation
+shipped with your AIRGen, Reify, or UHT Substrate distribution.
 
 ## The tour
 

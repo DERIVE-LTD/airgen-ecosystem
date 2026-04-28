@@ -8,16 +8,18 @@ PostgreSQL 16, and Redis 7.
 
 > **Prerequisites:**
 >
+> - A Derive Ltd licence that grants access to the AIRGen source
+>   distribution. Contact [info@derive-ltd.co.uk](mailto:info@derive-ltd.co.uk)
+>   to arrange access.
 > - Linux host (Docker host: Ubuntu 22.04+ or similar) with at least
 >   8 GB RAM, 4 vCPUs, and 100 GB disk.
 > - Docker and Docker Compose v2.
 > - A domain name pointed at the host's public IP.
 > - Roughly 60–90 minutes for a clean run.
 
-The repo at [github.com/Hollando78/airgen](https://github.com/Hollando78/airgen)
-ships everything you need: a development compose stack, a production
-compose stack with Traefik + TLS, env templates, backup scripts, and
-a multi-stage Docker build pipeline.
+The AIRGen distribution ships everything you need: a development
+compose stack, a production compose stack with Traefik + TLS, env
+templates, backup scripts, and a multi-stage Docker build pipeline.
 
 ## Architecture
 
@@ -32,10 +34,13 @@ The stack runs five services:
 | PostgreSQL 16 | `postgres:16`                | Auth + metadata catalog.                      |
 | Redis 7     | `redis:7`                      | Cache, rate limiting, background jobs.        |
 
-## 1. Clone the repo
+## 1. Get the source
+
+Clone the AIRGen source repository using the URL provided with your
+licence, then `cd` into the working copy:
 
 ```sh
-git clone https://github.com/Hollando78/airgen.git
+git clone <your-licensed-airgen-repo-url> airgen
 cd airgen
 ```
 
