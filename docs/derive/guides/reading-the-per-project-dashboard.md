@@ -12,55 +12,76 @@ each section and what to look for in a one-minute health-check.
 
 ## Page layout
 
-The dashboard is a single scrollable column. The left rail is
-project navigation only — it lists Dashboard, Artifacts, Report,
-Log, Control, and Downloads. All the dashboard content lives in the
+The dashboard is a single scrollable column titled `Dashboard`. The
+left rail is the project chrome: a `← Projects` back link, the
+project title, a favourite-star toggle, a `Search ⌘K` palette
+button, the six project tabs (Dashboard, Artifacts, Report, Log,
+Control, Downloads), and the signed-in user with a sign-out icon
+pinned to the bottom. A theme toggle (`◐ System`) sits in the
+bottom-right of the viewport. All dashboard content lives in the
 main pane.
+
+Section headings render in ALL CAPS via CSS; this guide reproduces
+the UI casing so readers can find each section by sight.
 
 In top-to-bottom order, the dashboard sections are:
 
-1. **Workflow** — visual state machine of the harness pipeline.
-2. **Metric tiles** — eight project-wide counters.
+1. **WORKFLOW** — visual state machine of the harness pipeline.
+2. **Metric tiles** — eight project-wide counters (no section header).
 3. **HARNESS** — live harness telemetry.
 4. **SAFETY REGIME** — regulatory context for the project.
 5. **SPEC TREE** — subsystem breakdown with status.
-6. **Recent Sessions** — latest journal entries.
+6. **RECENT SESSIONS** — latest journal entries.
 
-## Workflow
+## WORKFLOW
 
 The Workflow card visualises the harness state machine for this
-project. The phases run:
+project as a vertical list of phase rows, in this order:
 
-```
-Idle  →  Concept  →  Scaffold  →  Decompose  →  First Pass
-      →  QC Reviewed  →  Validated  →  Red Teamed  →  Complete
-```
+- Idle
+- Concept
+- Scaffold
+- Decompose
+- First Pass
+- QC Reviewed
+- Validated
+- Red Teamed
+- Complete
 
 Each row shows:
 
-- A status indicator (filled green dot = completed, half-filled
-  amber = current, empty = not yet reached).
-- The phase name and the workflow tag (`concept`, `scaffold`,
-  `decompose`, `qc`, `validate`, `review`, `red-team`, `current`).
-- A one-line description of what that phase produces.
+- A **status indicator**:
+  - filled green dot + ✓ — phase complete
+  - half-filled amber dot — phase active (current)
+  - empty dot — phase not yet reached
+- The **phase name**.
+- A **flow tag** — the harness flow that runs *from* this phase to
+  produce the next phase's deliverables. The tag vocabulary is
+  `concept`, `scaffold`, `decompose`, `qc`, `validate`, `review`,
+  `red-team`, and `current`. The `review` tag appears on two rows
+  (QC Reviewed → Validated and Red Teamed → Complete) because the
+  same review flow gates both transitions; `current` is the
+  sentinel attached to whichever phase is active.
+- A **one-line description** of what that flow produces.
 
 Read this first when opening a project — it tells you exactly where
 in the pipeline the autonomous loop currently is.
 
 ## Metric tiles
 
-Eight tiles, four-by-two, with the project's headline counters:
+Eight tiles, four-by-two, with the project's headline counters. The
+labels are rendered in small caps:
 
-| Tile           | What it counts                                          |
-| -------------- | ------------------------------------------------------- |
-| Requirements   | Total requirements across all documents.                |
-| Documents      | Number of documents (system, sub-system, …).            |
-| Diagrams       | Architecture diagrams.                                  |
-| Traces         | Trace links of all types.                               |
-| Entities       | Entities classified in UHT Substrate.                   |
-| Facts          | Substrate facts under the project namespace.            |
-| Last Flow      | The most recent harness flow that ran (e.g. `tech-author`). |
-| Last Session   | How long ago the last session completed.                |
+| Tile          | What it counts                                              |
+| ------------- | ----------------------------------------------------------- |
+| REQUIREMENTS  | Total requirements across all documents.                    |
+| DOCUMENTS     | Number of documents (system, sub-system, …).                |
+| DIAGRAMS      | Architecture diagrams.                                      |
+| TRACES        | Trace links of all types.                                   |
+| ENTITIES      | Entities classified in UHT Substrate.                       |
+| FACTS         | Substrate facts under the project namespace.                |
+| LAST FLOW     | The most recent harness flow that ran (e.g. `tech-author`). |
+| LAST SESSION  | How long ago the last session completed.                    |
 
 These are absolute counts, not deltas — for trends, look at the
 journal or run an `airgen diff` against a previous baseline.
@@ -76,22 +97,27 @@ A small status strip with four fields:
   `RESUME`, or a directive name).
 
 Use this for cost tracking and to confirm at a glance that the
-loop is doing what you expect.
+loop is doing what you expect. If `Timer` and `Directive` appear
+to disagree (e.g. `Timer running` with `Directive PAUSE`), the
+directive applies on the next scheduler tick — they will reconcile.
 
 ## SAFETY REGIME
 
-The safety regime card shows the regulatory framework the project
-is being evaluated against. The card has a status badge in the
-corner (e.g. `NONE`, `SET`, `CONFIRMED`).
+The safety regime card has a status badge in the top-right corner
+(`NONE`, `SET`, or `CONFIRMED`) and a six-field grid: three fields
+on the top row, three bordered sub-tiles on the bottom row.
 
-Fields:
+Top row:
 
 - **Primary** — the primary regime (e.g. SIL-2, ASIL-D, DAL-A,
-  tool-qualification, or "not set").
+  tool-qualification, or `— not set —`).
 - **Security** — security regime if applicable (e.g. ISO 27001).
 - **Tool-qualification** — for tools producing safety-critical
   output (e.g. DO-330).
-- **Confirmed** — yes/no, whether the regime has been
+
+Bottom row (sub-tiles):
+
+- **Confirmed** — `— yes` / `— no`, whether the regime has been
   human-confirmed.
 - **Hazards w/ regime** — count of hazards that have a regime
   assignment, over total hazards (e.g. `0 / 7`).
@@ -116,37 +142,45 @@ table with three columns:
 | Communication Subsystem | 1  | Complete  |
 | …                    | …     | …         |
 
-A "Full report" link in the top-right of the spec-tree section
+A `Full report` link in the top-right of the spec-tree section
 takes you to the project's full Report view (`/p/<slug>/report`),
 which renders the spec-tree in much more detail along with all the
 ConOps, Requirements, Design, Verification, and Hazards content.
 
-## Recent Sessions
+## RECENT SESSIONS
 
 The bottom section is a feed of the most recent harness sessions
-for this project — clickable through to individual journal
-entries. Each row shows:
+for this project. A `View log` link in the section's top-right
+takes you to the journal index (`/p/<slug>/journal`); each row in
+the feed is a direct link to that session's journal entry.
 
-- Session timestamp.
-- Workflow phase or flow name.
-- Outcome (ok / partial / failed).
+Each row shows:
 
-Click any row to read the full markdown post in the Log view.
+- The **session title** (left).
+- An optional **phase tag** (right, e.g. `Review`, `QC`,
+  `Decompose`) — present on sessions whose flow corresponds to a
+  workflow phase; absent on sessions that don't (e.g. one-off
+  remediation passes).
+- The **session date** (`YYYY-MM-DD`).
+
+Outcome (ok / partial / failed) is **not** shown on the dashboard;
+to see whether a session succeeded, click into the entry or use
+the Log view's filtering.
 
 ## A one-minute health check
 
 Top-to-bottom scan:
 
-1. **Workflow.** Where in the pipeline is the project? Anything
+1. **WORKFLOW.** Where in the pipeline is the project? Anything
    stuck at a phase for unusually long?
 2. **Metric tiles.** Numbers reasonable? Big jumps since you last
    looked?
 3. **HARNESS.** Timer running? Last cost normal? What's the current
    directive?
-4. **Safety Regime.** Set or not set? Confirmed? Coverage of hazards
+4. **SAFETY REGIME.** Set or not set? Confirmed? Coverage of hazards
    and requirements?
-5. **Spec Tree.** Any subsystem in an unexpected status?
-6. **Recent Sessions.** Anything failed or unexpected?
+5. **SPEC TREE.** Any subsystem in an unexpected status?
+6. **RECENT SESSIONS.** Anything recent and unexplained?
 
 Sixty seconds. If anything looks off, open the relevant tab —
 Control for loop control, Log for narrative detail, Quality Gates
