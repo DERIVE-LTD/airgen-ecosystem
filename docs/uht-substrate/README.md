@@ -99,15 +99,16 @@ via the spec-tree, dashboard, and quality view.
 
 ## Guides
 
+Start here:
+
 - [Getting started](./getting-started.md) — first classification,
   comparison, and fact
-- [`guides/`](./guides/) — task-oriented guides _(coming soon)_
 
-Planned topics:
+In-depth guides:
 
-- Classifying entities for a new project
-- Storing and querying facts with namespace scoping
-- Reconciling substrate facts against AIRGen trace links
-- Entity lifecycle: reclassify, merge, history, deduplicate
-- Connecting the substrate MCP server to Claude Desktop
-- Self-hosting UHT Substrate with Neo4j
+- [Classifying entities for a new project](./guides/classifying-entities-for-a-new-project.md)
+- [Storing and querying facts with namespace scoping](./guides/storing-and-querying-facts-with-namespace-scoping.md)
+- [Reconciling substrate facts against AIRGen trace links](./guides/reconciling-substrate-facts-against-airgen-trace-links.md)
+- [Entity lifecycle: reclassify, merge, history, deduplicate](./guides/entity-lifecycle.md)
+- [Connecting the substrate MCP server to Claude Desktop](./guides/connecting-the-substrate-mcp-server-to-claude-desktop.md)
+- [Self-hosting UHT Substrate with Neo4j](./guides/self-hosting-uht-substrate-with-neo4j.md)

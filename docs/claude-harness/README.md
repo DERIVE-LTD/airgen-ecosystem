@@ -50,13 +50,14 @@ produced the result.
 
 ## Guides
 
+Start here:
+
 - [Getting started](./getting-started.md) — how to engage with the
   harness via Derive
-- [`guides/`](./guides/) — task-oriented guides _(coming soon)_
 
-Planned topics:
+In-depth guides:
 
-- Understanding a harness session: phases, gates, and outputs
-- Writing effective directives for the autonomous loop
-- Reading session journals
-- The relationship between harness sessions, AIRGen baselines, and substrate facts
+- [Understanding a harness session: phases, gates, and outputs](./guides/understanding-a-harness-session.md)
+- [Writing effective directives for the autonomous loop](./guides/writing-effective-directives.md)
+- [Reading session journals](./guides/reading-session-journals.md)
+- [The relationship between harness sessions, AIRGen baselines, and substrate facts](./guides/relationship-between-sessions-baselines-and-substrate-facts.md)

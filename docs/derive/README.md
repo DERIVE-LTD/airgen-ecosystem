@@ -63,14 +63,15 @@ src/routes/
 
 ## Guides
 
+Start here:
+
 - [Getting started](./getting-started.md) — first-run walkthrough
-- [`guides/`](./guides/) — task-oriented guides _(coming soon)_
 
-Planned topics:
+In-depth guides:
 
-- Reading the per-project dashboard and spec-tree
-- The quality view: lint findings, orphans, gate state
-- Driving the autonomous loop: pause, unpause, and directives
-- Working with baselines and artefact bundles
-- Managing per-project roles and user access
-- Publishing a public read-only demo project
+- [Reading the per-project dashboard and spec-tree](./guides/reading-the-per-project-dashboard.md)
+- [The quality view: lint findings, orphans, gate state](./guides/the-quality-view.md)
+- [Driving the autonomous loop: pause, unpause, and directives](./guides/driving-the-autonomous-loop.md)
+- [Working with baselines and artefact bundles](./guides/working-with-baselines-and-artefact-bundles.md)
+- [Managing per-project roles and user access](./guides/managing-per-project-roles-and-user-access.md)
+- [Publishing a public read-only demo project](./guides/publishing-a-public-read-only-demo-project.md)

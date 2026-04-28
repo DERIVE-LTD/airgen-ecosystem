@@ -90,15 +90,16 @@ SFTP, or local disk) with client-side AES-256 encryption.
 
 ## Guides
 
+Start here:
+
 - [Getting started](./getting-started.md) — first-run walkthrough
-- [`guides/`](./guides/) — task-oriented guides _(coming soon)_
 
-Planned topics:
+In-depth guides:
 
-- Authoring your first requirement
-- Understanding the QA score and EARS patterns
-- Building a traceability matrix
-- Using the `@derive-ltd/airgen-cli` CLI
-- Connecting AIRGen to Claude via the MCP server
-- Self-hosting AIRGen with Docker Compose
-- Configuring the two-track backup model and restoring from restic
+- [Authoring your first requirement](./guides/authoring-your-first-requirement.md)
+- [Understanding the QA score and EARS patterns](./guides/understanding-the-qa-score-and-ears-patterns.md)
+- [Building a traceability matrix](./guides/building-a-traceability-matrix.md)
+- [Using the `@derive-ltd/airgen-cli` CLI](./guides/using-the-airgen-cli.md)
+- [Connecting AIRGen to Claude via the MCP server](./guides/connecting-airgen-to-claude-via-the-mcp-server.md)
+- [Self-hosting AIRGen with Docker Compose](./guides/self-hosting-airgen-with-docker-compose.md)
+- [Configuring the two-track backup model and restoring from restic](./guides/configuring-the-two-track-backup-model.md)

@@ -108,14 +108,15 @@ automatically with no client changes.
 
 ## Guides
 
+Start here:
+
 - [Getting started](./getting-started.md) — first-run walkthrough
-- [`guides/`](./guides/) — task-oriented guides _(coming soon)_
 
-Planned topics:
+In-depth guides:
 
-- Reading a Requirements (REQ) diagram
-- Reading a Safety (SAF) diagram
-- Editing SysML v2 source: workspace, dry-run, and commit
-- Using the Reify HTTP API
-- Using the Reify MCP server from Claude Desktop
-- Embedding `sysml-reactflow` in your own application
+- [Reading a Requirements (REQ) diagram](./guides/reading-a-requirements-req-diagram.md)
+- [Reading a Safety (SAF) diagram](./guides/reading-a-safety-saf-diagram.md)
+- [Editing SysML v2 source: workspace, dry-run, and commit](./guides/editing-sysml-v2-source-workspace-dry-run-and-commit.md)
+- [Using the Reify HTTP API](./guides/using-the-reify-http-api.md)
+- [Using the Reify MCP server from Claude Desktop](./guides/using-the-reify-mcp-server-from-claude-desktop.md)
+- [Embedding `sysml-reactflow` in your own application](./guides/embedding-sysml-reactflow-in-your-own-application.md)
