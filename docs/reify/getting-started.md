@@ -3,7 +3,7 @@
 Reify visualises the structured systems-engineering data produced by
 [Derive](../derive/) and held in [AIRGen](../airgen/). This guide walks
 through opening a project, reading its diagrams, and editing the SysML
-v2 source safely with the workspace + dry-run flow.
+v2 source via Reify's multi-file workspace.
 
 > **Prerequisites:**
 >
@@ -12,13 +12,14 @@ v2 source safely with the workspace + dry-run flow.
 > - A GitHub account for OAuth sign-in
 > - A project that already has SysML v2 source — typically produced by
 >   the AIRGen / Derive pipeline
+>
+> If you just want to look around without signing in, the public
+> read-only demo lives at [`/demo`](https://reify.airgen.studio/demo).
 
 ## 1. Sign in
 
 Sign in via GitHub. Your GitHub identity maps to a Reify account; an
 operator must associate it with the projects you should see.
-
-_TODO: screenshot of the sign-in screen._
 
 ## 2. Open a project
 
@@ -28,48 +29,69 @@ has its own slug and lives at `/p/<slug>/`.
 The project loads its SysML v2 source once, parses it client-side, and
 caches the AST in IndexedDB so subsequent view switches are instant.
 
+The project nav rail has **twelve view tabs** (CXD, BDD, IBD, REQ,
+TBL, STM, SAF, UC, ACT, PFD, SD, `{ }` SysML Text), plus an
+`Open in Derive →` link that takes you to the corresponding Derive
+project workspace.
+
 ## 3. Pick a starting view
 
-Reify offers fourteen views per project. Good starting points:
+Reify offers twelve views per project. Good starting points:
 
-- **`/cxd` Context Diagram** — see the system in its environment.
-- **`/req` Requirements diagram** — see requirement containment and
-  `satisfy` / `derive` links.
-- **`/saf` Safety analysis** — see hazards alongside their mitigating
-  requirements.
-- **`/tbl` Tabular view** — view requirements or blocks as tables when
+- **`/` CXD Context Diagram** — the project's root URL renders the
+  context diagram: stakeholders on one side, the system in the
+  middle, external interfaces on the other side.
+- **`/req` Requirements** — pick a requirement from the sidebar and
+  see only its directly-connected upstream/downstream nodes.
+- **`/saf` Safety** — pick a hazard from the sidebar and see its
+  mitigation chain.
+- **`/tbl` Tables** — view requirements or blocks as tables when
   diagrams are not the right tool.
+
+The REQ and SAF views are **element-scoped**: there is no
+"all requirements at once" or "all hazards at once" overview.
+Pick from the sidebar to focus.
 
 ## 4. Edit the SysML source
 
-Open `/sysml`. The CodeMirror editor shows the project's SysML v2
-source. Edit it and switch to any diagram view — the diagram re-renders
-from your edits.
+Open `/sysml`. The editor splits the project's SysML across **eleven
+files** in a side picker:
 
-Reify maintains two distinct sources for each project:
+- `Views.sysml`
+- `Stakeholders.sysml`
+- `Parts.sysml`
+- `Connections.sysml`
+- `Interfaces.sysml`
+- `Actions.sysml`
+- `States.sysml`
+- `Hazards.sysml`
+- `Constraints.sysml`
+- `Requirements.sysml`
+- `Traceability.sysml`
 
-- **Canonical** — reconstructed from the substrate knowledge graph and
-  AIRGen requirements. This is the truth.
-- **Workspace** — your in-progress edits. Workspaces are private to
-  your session until committed.
+Each file is a CodeMirror buffer. Edits update your workspace; the
+canonical source isn't touched until you commit.
 
-When the workspace differs from canonical, the project shows a **drift**
-indicator. You can dry-run, commit, or discard at any time.
+The toolbar above the editor offers four actions:
 
-_TODO: screenshot of the editor showing the drift indicator._
+- **`Snapshot version`** — name and save the current workspace state
+  as a snapshot you can come back to.
+- **`Reset all to generated`** — discard the workspace and revert
+  every file to the canonical (substrate + AIRGen) reconstruction.
+- **`Commit`** — apply the workspace edits to the substrate and
+  AIRGen.
+- **`History`** — open the commit history panel.
 
-## 5. Dry-run before committing
+A **dry-run** before commit is available via the API
+(`POST /api/v1/projects/<slug>/workspace/dry-run`) but isn't
+surfaced as a UI button at the time of writing.
 
-Before any change becomes part of the canonical model, run a **dry-run**.
-A dry-run parses your SysML, diffs it against the substrate and AIRGen
-state, and runs pre-commit checks — but applies nothing.
+## 5. Commit
 
-This is the recommended way to:
-
-- Catch parser errors early
-- Preview which substrate facts and AIRGen requirements your edit
-  would create, update, or delete
-- Validate that no existing trace links would dangle
+Commit applies your workspace to the substrate and AIRGen. Each
+commit is recorded in the project's audit trail
+(`/api/v1/projects/<slug>/audit`) as a `WORKSPACE_COMMIT` entry,
+newest first.
 
 ## 6. Try the API
 
@@ -118,7 +140,9 @@ Restart Claude Desktop and the Reify tools appear in the tool picker.
 
 ## Next steps
 
-- _TODO: link to "Reading a Requirements (REQ) diagram" guide_
-- _TODO: link to "Editing SysML v2 source: workspace, dry-run, and commit"_
-- _TODO: link to "Using the Reify MCP server from Claude Desktop"_
-- _TODO: link to "Embedding `sysml-reactflow` in your own application"_
+- [Reading a Requirements (REQ) diagram](./guides/reading-a-requirements-req-diagram.md)
+- [Reading a Safety (SAF) diagram](./guides/reading-a-safety-saf-diagram.md)
+- [Editing SysML v2 source: workspace, snapshot, and commit](./guides/editing-sysml-v2-source-workspace-dry-run-and-commit.md)
+- [Using the Reify HTTP API](./guides/using-the-reify-http-api.md)
+- [Using the Reify MCP server from Claude Desktop](./guides/using-the-reify-mcp-server-from-claude-desktop.md)
+- [Embedding `sysml-reactflow` in your own application](./guides/embedding-sysml-reactflow-in-your-own-application.md)

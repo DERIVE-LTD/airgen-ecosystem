@@ -1,135 +1,142 @@
 # Reading a Requirements (REQ) diagram
 
-The REQ diagram is Reify's view of a project's requirements topology
-— who derives from whom, what satisfies what, and what verifies what.
-This guide walks through the layout, the symbology, and a few
-practical reading patterns.
+The REQ view at `/p/<slug>/req` is Reify's per-requirement
+traceability inspector. Pick a requirement from the sidebar and
+the canvas renders only that requirement plus its
+directly-connected upstream and downstream nodes — the
+requirements it derives from, the requirements that derive from
+it, and the verification activities that test it.
+
+This guide walks the layout, the symbology, and the reading
+patterns this view is good for.
 
 > **Prerequisites:** access to a Reify project with at least some
 > requirements and trace links. See
 > [Getting started with Reify](../getting-started.md) if you don't
 > have one.
 
-## The four-column layout
+## Layout
 
-Open `/p/<slug>/req`. The diagram is laid out in four columns left
-to right, mirroring the natural flow of requirements engineering:
+The REQ view is two panes:
 
-```
-┌────────────┐  ┌────────────┐  ┌──────────────┐  ┌────────────────┐
-│ STAKEHOLDER│  │   SYSTEM   │  │ SUB-SYSTEM / │  │ VERIFICATION   │
-│  needs     │  │ requirements│ │ INTERFACE    │  │  activities    │
-└────────────┘  └────────────┘  └──────────────┘  └────────────────┘
-```
+- **Left sidebar** — every requirement in the project, listed by
+  reference (e.g. `SYS-REQ-001`, `SYS-REQ-002`). Above the list
+  is a **`+ Create View`** affordance for saving custom view
+  definitions.
+- **Canvas** — the requirement's local subgraph. Picking a
+  requirement updates the URL to
+  `/p/<slug>/req?view=view-req-<ref>` and renders that
+  requirement at the centre of the canvas.
 
-Column 1 — stakeholder needs — sits leftmost; verification activities
-sit rightmost. Each requirement is a node; each trace link is an
-edge. The flow reads left → right: stakeholder → system → sub-system
-or interface → verification.
+Above the canvas is a stats strip ("N requirements, N trace
+links") and the section header **Requirements Traceability**.
+The canvas controls (`Reset layout`, `Minimap`, zoom, fit view)
+sit in the corner, along with `Edit SysML` and `Commit` buttons
+that take you to the editor flow.
 
-This isn't a strict topological constraint. A stakeholder need can
-have a verification activity directly attached if the link exists in
-AIRGen. But the columnar layout reflects the *typical* flow and
-makes anomalies visually obvious — a stakeholder need with no
-descendants stands out as a column-1 node with no outgoing edges.
+## Why per-requirement, not all-at-once
 
-## Node symbols
+A project with 200 requirements and 500 trace links is unreadable
+as a single graph. The per-requirement view solves the readability
+problem at the cost of needing one click to swap focus.
 
-Each requirement node carries:
+In practice this works because the question you're usually asking
+about a requirement is local — *what derives from this? what
+verifies this? is its parent reasonable?* — and not global. For
+global views, use the AIRGen-side traceability matrix or the
+Reify HTTP API to fetch the full graph and render it externally.
 
-- **A header band** with the requirement's reference (e.g. `STK-007`,
-  `SYS-014`).
-- **The requirement text** (truncated; click to expand).
-- **A status colour** indicating QA score range, EARS pattern, or
-  lifecycle state (depending on which colour layer you've toggled).
-- **A small icon strip** for tags — safety, derived, frozen, etc.
+## Node types
 
-Verification nodes look slightly different — boxed with a method
-abbreviation (T / A / I / D for Test, Analysis, Inspection,
-Demonstration) and a status pill (passed, failed, in progress,
-blocked).
+Each node carries a header band with its kind, e.g.
+`<<REQUIREMENT-DEFINITION>>` or `<<REQUIREMENT-USAGE>>`, plus a
+type label (`Definition`, `Usage`).
+
+The body shows:
+
+- **The requirement's reference** (e.g. `SYS-REQ-023`).
+- **The requirement text** (truncated; expand with the chevron).
+- A **▼** caret to expand additional metadata.
+
+Verification nodes look slightly different — they're styled as
+verification cases and labelled accordingly.
 
 ## Edge types
 
-Edges are coloured and labelled by type:
+Edges I've observed in the demo project:
 
-| Type        | Visual                          | Reading                                        |
-| ----------- | ------------------------------- | ---------------------------------------------- |
-| `derives`   | solid arrow, `derives` label    | child derives from parent.                     |
-| `satisfies` | solid arrow, `satisfies` label  | child satisfies a higher-level requirement.    |
-| `refines`   | dashed arrow                    | child refines parent.                          |
-| `verifies`  | dashed arrow into a verif node  | activity verifies requirement.                 |
-| `implements`| double-stroke arrow             | implementation fulfils requirement.            |
-| `conflicts` | red, two-headed arrow           | the two requirements cannot both hold.         |
+| Type        | Reading                                           |
+| ----------- | ------------------------------------------------- |
+| `derives`   | Child derives from parent.                        |
+| `verifies`  | Verification activity verifies a requirement.     |
 
-Hover an edge to see the full link metadata (link ID, linkset
-membership, who created it).
+The underlying SysML v2 model also supports `satisfies`,
+`refines`, `implements`, and conflict relations; these may
+appear when the project's source uses them.
+
+Hovering an edge surfaces the link metadata.
 
 ## Reading patterns
 
-### 1. Find untraced requirements quickly
+### 1. Walk a chain
 
-Look for nodes in column 2 (system) or column 3 (sub-system) with
-**no incoming edge**. Those are requirements that derive from
-nothing — usually a missed trace, occasionally a deliberately
-isolated requirement.
+Pick a high-level requirement (e.g. a stakeholder need or a
+top-level system requirement). The canvas shows what derives from
+it directly. Click any neighbour in the canvas — or pick the
+neighbour from the sidebar — and the focus swaps. Repeat to walk
+the chain end-to-end.
 
-The same shortcut applies in column 4: a requirement with no
-verification activity is column-3 with no edge crossing into
-column 4.
+### 2. Find untraced requirements
 
-### 2. Follow a chain end-to-end
+Pick a requirement and look at its `derives` edges. A requirement
+with no inbound `derives` edge from a higher-level requirement is
+an orphan from a derivation standpoint — usually a missed trace.
 
-Pick a stakeholder need and click it. Reify highlights the entire
-descendant subgraph — every system requirement derived from it,
-every sub-system requirement under those, and the verification
-activities at the leaves. It's the fastest way to answer "is this
-need fully covered?"
+### 3. Audit verification coverage
 
-### 3. Spot conflicts
+Pick a requirement and look at outbound `verifies` edges. No
+edges = no verification activity claimed for this requirement.
+On a regulated project that's a coverage gap.
 
-Conflicts are red and two-headed. They should be rare; when they
-exist, click for the rationale and resolve them by:
+To audit coverage globally, walk the sidebar list and check each
+requirement's `verifies` edges. The HTTP API is faster for this
+— `/api/v1/projects/<slug>/trace-links?type=verifies` returns
+every verification edge in one call.
 
-- Refining one of the requirements until they no longer conflict
-- Deleting one of them (with a justification note)
-- Documenting that the conflict is intentional (a trade-off being
-  carried into review)
+## Saved views
 
-### 4. Audit verification coverage
+The **`+ Create View`** affordance at the top of the sidebar lets
+you save the current focus as a named view. Saved views appear in
+the sidebar alongside the per-requirement entries and are
+shareable via URL.
 
-Filter the diagram to show only the trace edges of type `verifies`.
-You should see a near-complete bipartite graph between column 3 and
-column 4 — every requirement on the left should have at least one
-incoming verification edge from the right. Holes are unverified
-requirements.
+## Switching scope
 
-## Per-element tabs
+The view is currently locked to per-requirement scope. There's
+no layout selector in the canvas (the underlying React Flow
+canvas uses the layered ELK layout for traceability data, which
+fits the typical "1-to-many derivation" shape).
 
-Most diagram types in Reify support per-element tabs (one tab per
-subsystem, hazard, etc.). REQ uses **per-document** tabs — pick a
-document (`system-requirements`, `interface-requirements`, …) to
-scope the diagram to that document's requirements only.
+To see a requirement at full text, click the `▼` caret on its
+node, or open `/p/<slug>/sysml` and jump to `Requirements.sysml`.
 
-This keeps the diagram readable on projects with hundreds of
-requirements: you'd never want to see every node at once.
+## Cross-checking with AIRGen
 
-## Switching layouts
+Reify's REQ view renders trace links sourced from AIRGen. To
+audit the source data:
 
-The layout selector (top-right) offers:
+```sh
+curl -H "Authorization: Bearer rfy_..." \
+     "https://reify.airgen.studio/api/v1/projects/<slug>/trace-links?ref=SYS-REQ-001"
+```
 
-- **Layered (default).** ELK's hierarchical layered layout —
-  optimised for the 4-column REQ flow.
-- **Force-directed.** Better for small diagrams where you want to
-  see relationships rather than hierarchy.
-- **Tree.** A single root with descendants — useful for printing.
-
-For REQ, layered is almost always right. The other layouts are
-there for unusual cases (e.g. visualising a tightly-coupled cluster
-of requirements with many cross-links).
+Returns the trace-link records that touch `SYS-REQ-001`. Compare
+with what the canvas renders; mismatch usually means the
+canonical SysML is stale (re-render the AST or commit the latest
+workspace).
 
 ## What's next
 
 - [Reading a Safety (SAF) diagram](./reading-a-safety-saf-diagram.md)
-- [Editing SysML v2 source: workspace, dry-run, and commit](./editing-sysml-v2-source-workspace-dry-run-and-commit.md)
+- [Editing SysML v2 source: workspace, snapshot, and commit](./editing-sysml-v2-source-workspace-dry-run-and-commit.md)
 - [Building a traceability matrix (AIRGen)](../../airgen/guides/building-a-traceability-matrix.md)

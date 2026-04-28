@@ -203,8 +203,12 @@ curl -H "Authorization: Bearer rfy_..." \
      "https://reify.airgen.studio/api/v1/projects/<slug>/audit"
 ```
 
-`WORKSPACE_COMMIT` history, parsed into
-`{ timestamp, sysmlHash, substrate, reqs, links }`. Newest first.
+`WORKSPACE_COMMIT` history, returned as
+`{ items: [{ timestamp, raw, ... }] }`. The `raw` field is a
+pipe-delimited summary line containing the SysML hash and the
+substrate / requirements / links counts, e.g.
+`2026-04-10T18:17:16.827Z | sha:14828a6776ef006d | substrate:+1/-0 | reqs:+0 | links:+1`.
+Parse client-side if you need structured fields. Newest first.
 
 ## What v1 doesn't do
 
@@ -230,8 +234,10 @@ const r = await fetch(
   `${REIFY}/api/v1/projects/${slug}/diagrams/bdd?scope=${encodeURIComponent("Power Subsystem")}`,
   { headers: { Authorization: `Bearer ${token}` } }
 );
-const diagram = await r.json();
-// diagram.nodes, diagram.edges — pass to your renderer
+const body = await r.json();
+// Response shape: { type, scope, diagram: { nodes, edges } }
+const { nodes, edges } = body.diagram;
+// pass to your renderer (ReactFlow-shaped)
 ```
 
 ### Pre-commit validation in CI

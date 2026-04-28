@@ -11,6 +11,7 @@ and exposes the same data through both an HTTP API and an MCP server
 for programmatic and agentic access.
 
 - **Hosted:** [reify.airgen.studio](https://reify.airgen.studio)
+- **Public demo:** [reify.airgen.studio/demo](https://reify.airgen.studio/demo)
 - **Stack:** Next.js 16 (App Router) on React 19, Tailwind 4,
   CodeMirror 6, React Flow 12, ELK.js, Mermaid 11
 - **Published packages:**
@@ -21,11 +22,11 @@ for programmatic and agentic access.
 
 | Capability                  | Summary                                                              |
 | --------------------------- | -------------------------------------------------------------------- |
-| Live SysML v2 editor        | Edit the SysML source in CodeMirror, watch diagrams re-render.       |
-| Fourteen views              | One canonical diagram per system aspect, plus tabular and overview.  |
+| Live SysML v2 editor        | Edit a multi-file SysML source in CodeMirror, watch diagrams re-render. |
+| Twelve views                | One canonical diagram per system aspect, plus a tabular view and the SysML text editor. |
 | ELK auto-layout             | Hands-free layered layout that handles realistic system sizes.       |
 | OMG SysML v2.0 coverage     | 60+ element types and 30+ edge types from the OMG specification.     |
-| Workspace + dry-run         | Edit, diff, validate against substrate + AIRGen — apply nothing.     |
+| Workspace + commit          | Edit, snapshot, reset to canonical, or commit to substrate + AIRGen. |
 | HTTP API (`/api/v1`)        | Read-only, Bearer-token auth, never returns bare arrays.             |
 | MCP server                  | Same surface, exposed at `/mcp` and as a CLI (`@derive-ltd/reify`).  |
 | Audit trail                 | `WORKSPACE_COMMIT` history per project, newest first.                |
@@ -35,22 +36,27 @@ for programmatic and agentic access.
 
 Each project lives at `/p/<slug>/`. The available views are:
 
-| Route       | View                          | Type                                       |
-| ----------- | ----------------------------- | ------------------------------------------ |
-| `/`         | Overview / summary            | mixed                                      |
-| `/sysml`    | SysML v2 source editor        | CodeMirror text editor                     |
-| `/bdd`      | Block Definition Diagram      | structural                                 |
-| `/ibd`      | Internal Block Diagram        | structural (instances + connections)       |
-| `/cxd`      | Context Diagram               | structural (system boundary)               |
-| `/req`      | Requirements diagram          | requirement containment + satisfy/derive   |
-| `/uc`       | Use Case diagram              | behavioural                                |
-| `/act`      | Activity diagram              | behavioural                                |
-| `/seq`      | Sequence diagram              | behavioural                                |
-| `/stm`      | State Machine diagram         | behavioural                                |
-| `/ffd`      | Function-Flow Diagram         | behavioural                                |
-| `/saf`      | Safety analysis view          | hazards / mitigations                      |
-| `/tbl`      | Tabular view                  | requirements / blocks as tables            |
-| `/sessions` | Agent session history         | per-project Claude runs                    |
+| Route       | Tab label              | Type                                       |
+| ----------- | ---------------------- | ------------------------------------------ |
+| `/`         | **CXD** Context        | structural (system boundary)               |
+| `/bdd`      | **BDD** Block Definition | structural                               |
+| `/ibd`      | **IBD** Internal Block | structural (instances + connections)       |
+| `/req`      | **REQ** Requirements   | per-requirement traceability subgraph      |
+| `/tbl`      | **TBL** Tables         | requirements / blocks as tables            |
+| `/stm`      | **STM** State Machine  | behavioural                                |
+| `/saf`      | **SAF** Safety         | per-hazard analysis subgraph               |
+| `/uc`       | **UC** Use Cases       | behavioural                                |
+| `/act`      | **ACT** Actions        | behavioural                                |
+| `/ffd`      | **PFD** Phys. Flow     | behavioural (physical flow)                |
+| `/seq`      | **SD** Sequence        | behavioural                                |
+| `/sysml`    | **{ }** SysML Text     | multi-file CodeMirror editor               |
+
+Twelve view tabs in the project nav rail. The root URL renders the
+**CXD** Context Diagram. The REQ and SAF views are
+**element-scoped**: the canvas shows one requirement (or one
+hazard) at a time, picked from a sidebar. Every view also has an
+"Open in Derive →" link that takes you to that project's Derive
+workspace.
 
 The view system is data-driven: each project page reads its SysML v2
 source, parses it once, caches the AST in IndexedDB, and renders any of
@@ -89,6 +95,12 @@ diagrams (`bdd`, `ibd`, `act`, `saf`, `req`, `stm`, `cxd`, `uc`, `ffd`),
 requirements, trace links, raw substrate facts, workspace state, dry-run,
 and audit history.
 
+> Note: dry-run is exposed via the API but not as a button in the
+> editor UI. The UI flow is edit → Commit (with optional
+> `Snapshot version` to name a save-point and `Reset all to
+> generated` to discard). To dry-run before committing, hit the
+> API directly.
+
 ### MCP server / CLI
 
 The same data is exposed via MCP at `/mcp`. The `@derive-ltd/reify`
@@ -116,7 +128,7 @@ In-depth guides:
 
 - [Reading a Requirements (REQ) diagram](./guides/reading-a-requirements-req-diagram.md)
 - [Reading a Safety (SAF) diagram](./guides/reading-a-safety-saf-diagram.md)
-- [Editing SysML v2 source: workspace, dry-run, and commit](./guides/editing-sysml-v2-source-workspace-dry-run-and-commit.md)
+- [Editing SysML v2 source: workspace, snapshot, and commit](./guides/editing-sysml-v2-source-workspace-dry-run-and-commit.md)
 - [Using the Reify HTTP API](./guides/using-the-reify-http-api.md)
 - [Using the Reify MCP server from Claude Desktop](./guides/using-the-reify-mcp-server-from-claude-desktop.md)
 - [Embedding `sysml-reactflow` in your own application](./guides/embedding-sysml-reactflow-in-your-own-application.md)

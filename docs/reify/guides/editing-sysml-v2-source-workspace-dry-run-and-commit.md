@@ -1,13 +1,18 @@
-# Editing SysML v2 source: workspace, dry-run, and commit
+# Editing SysML v2 source: workspace, snapshot, and commit
 
-Reify's SysML editor isn't just a text editor — it sits on top of a
-workspace model that lets you stage edits, dry-run them against the
-substrate and AIRGen, and commit only when you're satisfied. This
-guide explains the workspace lifecycle and the tools at each stage.
+Reify's SysML editor sits on top of a workspace model. The
+canonical source — what every diagram view renders from when no
+edits are pending — is reconstructed from UHT Substrate facts and
+AIRGen requirements. Your edits go into a workspace that is
+yours alone until you commit it back to the substrate and AIRGen.
 
-> **Prerequisites:** a Reify project with existing SysML v2 source
-> and a Bearer token / login that has write access (workspaces are
-> per-user).
+This guide walks the actual editor UI, the API-only dry-run,
+and the audit trail.
+
+> **Prerequisites:** a Reify project and a login that has write
+> access to it. The public demo at `/demo` lets you open the
+> editor read-only; commits require an authenticated user with
+> write permission.
 
 ## The two SysML sources
 
@@ -19,51 +24,81 @@ Each project has two distinct SysML v2 sources:
 - **Workspace** — your in-progress edits. Workspaces are private to
   your session until committed.
 
-When the workspace differs from canonical, the project shows a
-**drift indicator**. You can dry-run, commit, or discard at any time.
+Workspace state is exposed at `/api/v1/projects/<slug>/workspace`
+which returns `{ exists, meta, ... }`. You can poll this endpoint
+to see whether a workspace is pending and how it differs from
+canonical.
 
 ## 1. Open the editor
 
-Navigate to `/p/<slug>/sysml`. The CodeMirror editor loads the
-project's canonical SysML v2 source. Edits here go into your
-workspace, not into the canonical source.
+Navigate to `/p/<slug>/sysml`. The editor splits the project's
+SysML across **eleven files** in a left-side file picker:
 
-The editor has:
+- `Views.sysml`
+- `Stakeholders.sysml`
+- `Parts.sysml`
+- `Connections.sysml`
+- `Interfaces.sysml`
+- `Actions.sysml`
+- `States.sysml`
+- `Hazards.sysml`
+- `Constraints.sysml`
+- `Requirements.sysml`
+- `Traceability.sysml`
 
-- Syntax highlighting for SysML v2.
-- Section folding by package / part definition.
-- Line numbers and column tracking.
-- A status bar showing the workspace state (clean, drifted, parsing,
-  with errors).
+Each file is a CodeMirror buffer with line numbers, syntax
+highlighting, and section folding. The current file's line count
+is shown above the editor.
 
-## 2. Make an edit
+A right-side panel lists the section anchors (named declarations
+in the current file) so you can jump to a specific definition.
 
-Type into the editor. Each keystroke updates your workspace — there
-is no separate "save" step. The status bar transitions from
-**clean** to **drifted** as soon as you type.
+## 2. The toolbar
 
-Switch to any diagram view (`/p/<slug>/bdd`, `/req`, `/saf`, …) and
-the diagrams re-render from your workspace, not from canonical.
-This is the fastest feedback loop available — see the impact of an
-edit instantly across all views.
+Four actions live in the toolbar above the editor:
 
-## 3. Dry-run before committing
+| Button                   | Effect                                                                |
+| ------------------------ | --------------------------------------------------------------------- |
+| **Snapshot version**     | Save the current workspace state as a named snapshot you can revisit. |
+| **Reset all to generated** | Discard the workspace; every file reverts to canonical.            |
+| **Commit**               | Apply the workspace edits to substrate + AIRGen in one step.          |
+| **History**              | Open the commit-history panel for this project.                       |
 
-Once your edits look good, **dry-run** before committing. A dry-run:
+There is **no separate dry-run button in the UI**. Dry-run is
+exposed via the API (see below); operators who want to preview a
+commit before applying it should call the API or rely on the
+commit operation's pre-commit checks.
 
-1. Parses your workspace SysML.
-2. Diffs the parsed result against the substrate and AIRGen state.
-3. Runs pre-commit checks — orphan detection, schema validation,
-   trace link consistency.
-4. Returns a structured report.
+The header also has `Download .sysml` (export the workspace
+content) and `View in Derive →` (jump to the Derive project page).
 
-Critically, **a dry-run applies nothing**. It tells you exactly what
-the commit will do without doing it.
+## 3. Make an edit
 
-In the UI, the dry-run button is in the editor toolbar; the report
-opens in a side panel.
+Type into any of the eleven file buffers. Edits go to the
+workspace, not to canonical. Switch to any diagram view
+(`/p/<slug>/bdd`, `/req`, `/saf`, …) and the diagrams re-render
+from your workspace if it differs from canonical, otherwise from
+canonical directly.
 
-Via the API:
+Switching files within the editor is instant — buffers are
+held in memory.
+
+## 4. Snapshot before risky changes
+
+Before a substantial restructuring, click **Snapshot version**
+and give the snapshot a name. If you decide the change isn't
+working, you can return to the named snapshot rather than to
+canonical.
+
+Snapshots are workspace-local — they don't show up in the
+audit trail until you commit one.
+
+## 5. Dry-run via the API
+
+A dry-run parses workspace SysML, diffs it against the substrate
+and AIRGen state, and runs pre-commit checks — but applies
+nothing. Use this in CI or in an external script before clicking
+Commit.
 
 ```sh
 curl -X POST -H "Authorization: Bearer rfy_..." \
@@ -71,6 +106,9 @@ curl -X POST -H "Authorization: Bearer rfy_..." \
      -d "{\"sysml\": \"$(cat workspace.sysml)\"}" \
      https://reify.airgen.studio/api/v1/projects/<slug>/workspace/dry-run
 ```
+
+If `sysml` is omitted from the dry-run body, the API uses the
+current workspace buffer.
 
 The response includes:
 
@@ -80,111 +118,83 @@ The response includes:
 - **`pre_commit_findings`** — orphans, broken trace links, etc.
 - **`parse_errors`** — any SysML parser errors that would block commit.
 
-## 4. Read the dry-run report
+A non-empty `parse_errors` or `pre_commit_findings` means the
+commit would fail or surface warnings. In CI, fail the pipeline
+on any non-empty array.
 
-A typical dry-run for a moderate edit:
+## 6. Commit
 
-```
-Dry-run: project widget-x
-─────────────────────────
+Click **Commit**. The workspace edits are applied:
 
-Adds (3)
-  · entity "Thermal Radiator" in SE:widget-x
-  · fact "Thermal Radiator" PART_OF "Thermal Loop"
-  · requirement SYS-027 "The radiator shall dissipate ≥ 250 W ..."
+- Substrate facts are upserted.
+- AIRGen requirements get created/updated/deleted to match.
+- The workspace's content becomes the new canonical source.
 
-Updates (1)
-  · requirement SYS-014 — text changed
-
-Deletes (0)
-
-Pre-commit findings: clean
-
-Parse errors: none
-```
-
-The dry-run is your last chance to catch:
-
-- **Accidentally deleted requirements** (a typo in the SysML can
-  remove a definition, which the dry-run translates into a delete).
-- **Broken trace links** — if you renamed a requirement reference,
-  any trace link still pointing at the old reference shows up here.
-- **Orphan facts** — substrate facts that would no longer have a
-  corresponding entity.
-
-If anything looks wrong, edit and dry-run again.
-
-## 5. Commit
-
-Commit applies the dry-run plan: substrate facts get upserted,
-AIRGen requirements get created/updated/deleted, and the workspace
-syncs to canonical.
-
-The UI commit button asks for a one-line message ("commit message")
-that goes into the audit trail. Pick something readable — it will
-show up in `WORKSPACE_COMMIT` audit entries forever.
-
-After commit, the status bar returns to **clean**. The workspace and
-canonical are now identical.
+Each commit appears in the project's audit trail at
+`/api/v1/projects/<slug>/audit` as a `WORKSPACE_COMMIT` entry,
+newest first. Each entry includes the timestamp, the SysML hash,
+and counts of substrate / requirements / links touched.
 
 > The commit endpoint is **not** exposed via the v1 read-only HTTP
 > API or the MCP server — it lives behind the cookie-authenticated
 > UI. This is intentional: writes go through the UI's auth path, not
 > through Bearer tokens.
 
-## 6. Discard the workspace
+## 7. Discard
 
-If you decide your edits weren't right, discard:
+If you decide your workspace edits weren't right, click
+**Reset all to generated**. Every file reverts to canonical;
+unsaved edits are lost. Snapshots survive this — they're kept
+separately.
 
-- **UI** — Discard button in the editor toolbar (with confirmation).
-- **Effect** — workspace resets to canonical; any unsaved edits
-  are lost.
+There is no auto-reset. A workspace persists across sessions
+until you commit, snapshot, or reset it explicitly.
 
-There is no auto-discard. A workspace persists across sessions until
-you commit or discard it explicitly. This is a feature: you can
-start an edit on Friday, log off, and pick it up on Monday.
-
-## 7. Inspect commit history
+## 8. Read the commit history
 
 ```sh
 curl -H "Authorization: Bearer rfy_..." \
      https://reify.airgen.studio/api/v1/projects/<slug>/audit
 ```
 
-Returns the chain of `WORKSPACE_COMMIT` entries, newest first. Each
-entry includes:
+Returns `{ items: [...] }` — the chain of `WORKSPACE_COMMIT`
+entries, newest first. Each entry includes:
 
-- Timestamp.
-- Author.
-- SysML hash before / after.
-- Counts of substrate facts, requirements, and links touched.
-- Commit message.
+- `timestamp` (ISO 8601).
+- `raw` — a pipe-delimited summary line containing the SysML
+  hash and the substrate / requirements / links counts.
+- Author and commit-message metadata where present.
 
-This is the project's source-of-truth audit log for SysML edits.
+The same history is reachable from the editor's `History` button.
 
 ## Common patterns
 
 ### Tight-loop edit-and-render
 
-Open the editor in one window and a diagram view in another. Edit;
-the diagram re-renders from your workspace. Iterate until the
-diagram looks right, then dry-run.
+Open the editor in one window and a diagram view (e.g. `/bdd`,
+`/req`) in another. Edit a file in the workspace; the diagram
+re-renders. Iterate until the diagram looks right, then commit.
 
 ### Big-bang reorg
 
-For substantial restructuring, do the edit in your local editor (any
-text editor with SysML highlighting), then paste into the workspace
-in one go. Dry-run *immediately* — the parser will catch any
-syntax issue before you've spent time looking at diagrams.
+For substantial restructuring across multiple files, snapshot
+first, then edit. If the result is right, commit. If not, reset.
+
+### Dry-run-in-CI
+
+Wire your CI to call the dry-run endpoint with the SysML you
+intend to commit and fail the pipeline on any `parse_errors` or
+`pre_commit_findings`. The Reify UI doesn't expose this gate;
+your CI does.
 
 ### Concurrent editors
 
-Reify's workspace is per-user, so two engineers editing in parallel
-don't see each other's drafts. But they can both **commit** to the
-same canonical source. The audit trail records who did what; conflict
-resolution is conventional source-control style — last-commit-wins.
-For projects with many concurrent editors, schedule edits or split
-the project into smaller scoped subsystems.
+Reify's workspace is per-user, so two engineers editing in
+parallel don't see each other's drafts. They can both **commit**
+to the same canonical source. The audit trail records who did
+what; conflict resolution is conventional source-control style —
+last-commit-wins. For projects with many concurrent editors,
+schedule edits or split into smaller scoped subsystems.
 
 ## What's next
 

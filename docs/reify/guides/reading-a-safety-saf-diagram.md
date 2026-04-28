@@ -1,112 +1,101 @@
 # Reading a Safety (SAF) diagram
 
-The SAF diagram is Reify's view of safety analysis: hazards on the
-left, the requirements that mitigate them in the middle, and the
-verification activities that demonstrate the mitigation on the right.
-It is the workspace's answer to "what could go wrong, and how do we
-prove it doesn't?"
+The SAF view at `/p/<slug>/saf` is Reify's per-hazard safety
+inspector. Pick a hazard from the sidebar and the canvas renders
+the hazard, the requirements that mitigate it, and the
+verification activities that demonstrate the mitigation — for
+that one hazard.
+
+This guide walks the layout, the symbology, and the reading
+patterns this view is good for.
 
 > **Prerequisites:** access to a Reify project with at least some
 > hazards modelled (typically as substrate facts under
 > `HAS_HAZARD`, with mitigating requirements in AIRGen).
 
-## The three-column layout
+## Layout
 
-Open `/p/<slug>/saf`. The layout is:
+The SAF view is two panes:
 
-```
-┌─────────────┐    ┌─────────────────────────┐    ┌────────────────┐
-│   HAZARD    │    │    MITIGATING           │    │ VERIFICATION   │
-│             │ ─▶ │    REQUIREMENTS         │ ─▶ │  ACTIVITIES    │
-└─────────────┘    └─────────────────────────┘    └────────────────┘
-```
+- **Left sidebar** — every hazard in the project, listed by
+  reference (e.g. `H-001 Hazard Analysis` through
+  `H-007 Hazard Analysis` in the demo).
+- **Canvas** — the hazard's local subgraph: hazard node →
+  mitigating requirement nodes → verification activity nodes.
+  Picking a hazard updates the URL to
+  `/p/<slug>/saf?view=view-saf-<ref>`.
 
-Each hazard sits as a node on the left. The trace links from the
-mitigating requirements (`satisfies` or `mitigates` depending on
-your project's vocabulary) connect into the centre column. The
-verification activities sit on the right, linked to mitigating
-requirements by `verifies`.
+Above the canvas is a stats strip
+(e.g. `1 hazards, 10 SIL requirements, 6 mitigation links,
+4 verification links`) and the section header **Safety Diagram**.
+The same canvas controls as the other diagram views.
 
 ## Node symbology
 
 ### Hazards
 
-Hazard nodes carry:
+A hazard node carries:
 
-- **Identifier** — the hazard's reference (e.g. `HAZ-003`).
+- **Identifier** — the hazard's reference (e.g. `H-003`).
 - **Description** — short statement of the failure mode.
-- **Severity / SIL** — when present, displayed as a coloured band
-  (e.g. SIL-3, ASIL-D, DAL-A — depending on the standard).
-- **Cause and effect** — when modelled, surfaced in the hover panel.
+- **Severity / SIL** — when present, displayed alongside the
+  hazard descriptor (e.g. SIL-3, ASIL-D, DAL-A — depending on
+  the standard your project uses).
 
 ### Mitigating requirements
 
-These are the same nodes as on the REQ diagram (same colour scheme,
-same symbology) — they show up here because they have an outgoing
-trace to a hazard.
+These are the same nodes you'd see on the REQ diagram (same
+colour scheme, same kinds), but here they show up because
+they're linked from a hazard.
 
 ### Verification activities
 
-Same as on the REQ diagram. A green pill means passed evidence is
-attached.
+Verification cases for the mitigating requirements. Hover for
+metadata; click to focus.
 
-## Per-hazard tabs
+## Edge types
 
-The SAF view has **one tab per hazard** by default. This keeps the
-diagram readable on projects with twenty hazards each carrying half
-a dozen mitigating requirements — you wouldn't want them all on
-screen at once.
+| Type        | Reading                                                      |
+| ----------- | ------------------------------------------------------------ |
+| `mitigates` | Requirement mitigates the hazard.                            |
+| `verifies`  | Verification activity verifies the mitigating requirement.   |
 
-Switch tabs to focus on a single hazard's full chain:
-
-- The hazard node
-- All requirements that mitigate it
-- All verification activities for those requirements
-- Any unmet links (mitigation declared but no requirement, or
-  requirement with no verification)
+The stats strip names these explicitly: "N mitigation links,
+N verification links" for the focused hazard.
 
 ## Reading patterns
 
 ### 1. "Is this hazard covered?"
 
-For a given hazard, you want at least one mitigating requirement,
-and each mitigating requirement should have at least one
-verification activity. The tab view is calibrated for this question.
+Pick the hazard from the sidebar. You want to see:
 
-A clean hazard tab looks like:
+- At least one mitigating requirement (`mitigates` edge).
+- Each mitigating requirement followed by at least one
+  verification activity (`verifies` edge).
 
-```
-HAZ-003 ──▶ SYS-014 ──▶ Activity-T-007 (passed)
-       └──▶ SYS-015 ──▶ Activity-A-002 (passed)
-```
-
-A problematic hazard tab looks like:
+A clean hazard subgraph looks like:
 
 ```
-HAZ-003 ──▶ SYS-014 ──▶ Activity-T-007 (in progress)
-       └──▶ ?      (no requirement)
+H-001 ──mitigates──▶ SYS-REQ-014 ──verifies──▶ Activity-T-007
+      └─mitigates──▶ SYS-REQ-015 ──verifies──▶ Activity-A-002
 ```
 
-The "no requirement" gap means the hazard is partially declared but
-not yet mitigated — a clear action item.
+If the chain breaks anywhere — a hazard with no mitigations, or
+a mitigation with no verification — that's an action item.
 
 ### 2. "Is the SIL allocation right?"
 
 Hover over a mitigating requirement and look at its claimed SIL
 versus the hazard's required SIL. If the requirement claims SIL-2
-but the hazard requires SIL-3, the allocation isn't right. (Reify
-shows the SIL where it's modelled in substrate; if your project
-doesn't model SIL, this question doesn't apply.)
+but the hazard requires SIL-3, the allocation isn't right.
+(Reify shows the SIL where it's modelled in substrate; if your
+project doesn't model SIL, this question doesn't apply.)
 
-### 3. "What evidence proves this hazard is mitigated?"
+### 3. Walk every hazard
 
-Click into a verification activity. The hover or detail panel shows
-the evidence records attached. Look for:
-
-- At least one passed evidence record.
-- Recent enough — evidence stale by years on a regulated project is
-  typically a red flag.
-- Records signed by an appropriate role.
+The sidebar makes a checklist: for each hazard, focus the canvas,
+walk the chain, note any gaps. The list is short enough that
+this is a useful pre-baseline ritual on regulated projects.
 
 ### 4. Cross-check with substrate
 
@@ -115,35 +104,37 @@ Substrate. To audit the source data:
 
 ```sh
 uht-substrate facts query \
-  --namespace SE:widget-x \
+  --namespace SE:<slug> \
   --predicate HAS_HAZARD
 ```
 
-The substrate query should match the hazards you see in the diagram.
-A mismatch means substrate / Reify drift — see
+The substrate query should match the hazards in the sidebar. A
+mismatch means substrate / Reify drift — see
 [Reconciling substrate facts against AIRGen trace links](../../uht-substrate/guides/reconciling-substrate-facts-against-airgen-trace-links.md).
 
-## Layout choices
+## Saved views
 
-The default ELK layered layout is best for SAF: it produces a clean
-left-to-right flow. Force-directed and tree layouts exist but rarely
-help — the columnar story is what you want.
+The **`+ Create View`** affordance at the top of the sidebar lets
+you save the current focus as a named view. Useful for hazards
+that get reviewed often.
 
 ## A typical safety review workflow
 
-1. Open the SAF view.
-2. Walk every hazard tab in order. For each:
+1. Open `/p/<slug>/saf`.
+2. Walk every hazard in the sidebar in order. For each:
    - Confirm at least one mitigating requirement.
    - Confirm at least one verification activity per mitigating
-     requirement, with passed evidence.
+     requirement.
    - Note any gaps in a review log.
-3. Cross-check the hazard list against substrate (`facts query
-   --predicate HAS_HAZARD`).
-4. Generate a baseline (`airgen bl create`) once the review is clean.
-5. Export the safety baseline as part of the regulatory deliverable.
+3. Cross-check the hazard list against substrate
+   (`facts query --predicate HAS_HAZARD`).
+4. Export the safety documentation from Derive's
+   [Downloads tab](../../derive/guides/exports-and-document-bundles.md)
+   (Verification Plan + Design Description) once the review is
+   clean.
 
 ## What's next
 
 - [Reading a Requirements (REQ) diagram](./reading-a-requirements-req-diagram.md)
-- [Working with baselines and artefact bundles (Derive)](../../derive/guides/working-with-baselines-and-artefact-bundles.md)
+- [Exports and document bundles (Derive)](../../derive/guides/exports-and-document-bundles.md)
 - [Reconciling substrate facts against AIRGen trace links](../../uht-substrate/guides/reconciling-substrate-facts-against-airgen-trace-links.md)
