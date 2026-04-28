@@ -182,7 +182,7 @@ projects without drama.
 ## What's next
 
 - [Understanding a harness session](./understanding-a-harness-session.md)
-- [Writing effective directives](./writing-effective-directives.md)
+- [Steering the autonomous loop](./writing-effective-directives.md)
 - [Reading session journals](./reading-session-journals.md)
 - [Working with baselines and artefact bundles (Derive)](../../derive/guides/working-with-baselines-and-artefact-bundles.md)
 - [Reconciling substrate facts against AIRGen trace links (UHT Substrate)](../../uht-substrate/guides/reconciling-substrate-facts-against-airgen-trace-links.md)

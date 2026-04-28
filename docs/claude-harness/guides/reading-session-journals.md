@@ -204,5 +204,5 @@ substrate data — it's part of the project's record.
 ## What's next
 
 - [Understanding a harness session](./understanding-a-harness-session.md)
-- [Writing effective directives](./writing-effective-directives.md)
+- [Steering the autonomous loop](./writing-effective-directives.md)
 - [The relationship between harness sessions, AIRGen baselines, and substrate facts](./relationship-between-sessions-baselines-and-substrate-facts.md)

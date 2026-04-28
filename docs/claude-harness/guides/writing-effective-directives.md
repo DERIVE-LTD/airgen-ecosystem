@@ -1,237 +1,263 @@
-# Writing effective directives for the autonomous loop
+# Steering the autonomous loop
 
-A directive is a free-text instruction the harness incorporates into
-the next session's context. Directives are how operators steer the
-loop without micro-managing each session. A well-written directive
-saves dozens of cycles; a vague one wastes them.
+The harness is the autonomous engine; Derive's Control Panel is your
+steering surface. The operator's levers are not free-text
+instructions — they're a small fixed set: a **STATUS** toggle, a
+**MODE** toggle, a **WORKFLOW** dropdown, and three directive
+**buttons** (Resume, Run Now, Force QC). This guide covers how to
+combine them effectively.
 
-This guide covers the structure of effective directives, common
-patterns, and the anti-patterns that produce poor results.
-
-> **Prerequisites:** ability to submit directives to a project's
-> loop. In Derive, this is admin role. See
+> **Prerequisites:** ability to operate the loop on a project. In
+> Derive, this is admin role. See
 > [Driving the autonomous loop](../../derive/guides/driving-the-autonomous-loop.md)
 > for the mechanics.
 
-## The shape of a good directive
-
-A useful directive has four parts:
-
-1. **Focus.** What should the next session work on?
-2. **Constraint.** What should it *not* do?
-3. **Acceptance criterion.** How will the loop / operator know it's
-   done?
-4. **Context.** Anything relevant the loop wouldn't otherwise infer.
-
-Worked example:
-
-> *"Resolve orphan trace links in `system-requirements` (focus). Do
-> not create new requirements (constraint). Acceptance: every
-> requirement in that document has at least one incoming and one
-> outgoing trace link, or is marked as intentionally untraced
-> (criterion). Note: the parent layer is `stakeholder-requirements`;
-> when proposing a parent, prefer existing stakeholder needs over
-> creating new ones (context)."*
-
-Compare to a bad directive:
-
-> *"Clean up the project."*
-
-The first version produces a focused session that finishes the work.
-The second produces an unfocused session that does a little of
-everything and finishes nothing.
-
-## Patterns by phase
-
-Different pipeline phases benefit from different directive styles.
-
-### Concept / scaffold
-
-Use directives to set scope and the structuring choices:
-
-- *"This project is a SIL-2 control system for a marine pump. Build
-  the document structure with stakeholder-requirements,
-  system-requirements, sub-system-requirements (electrical,
-  mechanical, control), interface-requirements, and
-  hazard-analysis."*
-
-- *"Use a four-layer decomposition: stakeholder → system →
-  sub-system → component. Don't go deeper unless explicitly
-  needed."*
-
-### Decompose
-
-Use directives to focus on one subtree at a time:
-
-- *"Decompose stakeholder need STK-007 into system requirements.
-  Aim for 5–10 system requirements; don't over-decompose. Use EARS
-  patterns where the requirement has a clear trigger or state."*
-
-- *"For each system requirement created, propose at least one
-  verification activity, with method (Test / Analysis / Inspection
-  / Demonstration) and a one-line description."*
-
-### QC / quality polish
-
-Use directives to lift specific QA dimensions:
-
-- *"Polish QA on `system-requirements`. Target: median QA score
-  ≥ 80. Don't change requirement intent — only wording. If a
-  requirement is fundamentally weak, flag it for human review
-  rather than rewriting."*
-
-- *"For every requirement with a QA score below 60, propose a
-  rewrite that lifts the score. Do not commit; create candidates
-  for human review."*
-
-### Validate / review
-
-Use directives to focus the adversarial pass:
-
-- *"Red-team the safety analysis for hazard HAZ-003. Look for
-  unmitigated paths, single-point failures, and missing assumptions.
-  Produce a list of concerns with severity, not requirement
-  changes."*
-
-- *"Validate the substrate facts under `SE:widget-x`. For each
-  fact, check that subject and object exist as classified entities,
-  and that the predicate matches the standard vocabulary. Flag
-  inconsistencies."*
-
-### Technical author
-
-Use directives to shape voice, audience, and output:
-
-- *"Polish the requirements text for an audience of mechanical
-  engineers unfamiliar with the project. Active voice. UK English.
-  Don't change meaning."*
-
-- *"Generate a one-page executive summary of the project status,
-  written for a non-technical project sponsor. 250 words."*
-
-## Patterns that work
-
-### Anchor to references
-
-Always anchor to specific requirements, hazards, or sections by
-reference. The loop has access to the references; vague descriptions
-("the thermal stuff") force it to guess.
-
-### Bound the work
-
-Specify a target — *"5–10 requirements"*, *"median QA ≥ 80"*,
-*"resolve at least 20 orphans"* — so the loop knows when to stop.
-Without a bound, sessions sprawl.
-
-### Prefer "do" over "don't"
-
-Positive directives are easier for the loop to act on. Instead of
-*"don't write composite requirements"*, say *"each requirement
-should commit to one behaviour"*.
-
-### Stack directives
-
-Multiple directives stack. The loop reads the most recent ones
-first. Use this for refinement:
-
-- Day 1: *"Decompose stakeholder needs into system requirements."*
-- Day 3: *"Polish QA on the system requirements created in the last
-  three sessions; don't add more."*
-- Day 7: *"Add verification activities for system requirements that
-  don't yet have one."*
-
-Each directive narrows the focus. The loop doesn't lose track of the
-earlier ones — they're still in the project's directive history —
-but it acts on the freshest signal.
-
-### Match directive to gate
-
-A directive that asks for output the gates won't accept produces a
-loop that fails repeatedly. If your QA gate is 70 and you direct
-*"draft requirements at any QA level"*, expect the gate to reject
-the output. Either lower the gate (in workflow config) or raise the
-directive's bar.
-
-## Anti-patterns
-
-### "Improve the project"
-
-Too vague. The loop has no measurable target, no scope. Wastes a
-session.
-
-### "Fix everything"
-
-Same. Worse, the loop will try, succeed at nothing, and produce a
-demoralising journal post.
-
-### "Make it like project X"
-
-The loop doesn't have cross-project context (sessions are scoped to
-one project's namespace). This will fail.
-
-### "Just decompose"
-
-Marginal. The loop will pick a stakeholder need at random and
-decompose it; the result is noisy and unfocused. Always anchor to a
-specific stakeholder need or document.
-
-### Directive overload
-
-A 500-word directive with eight conflicting goals is harder to act
-on than three crisp 100-word directives stacked over a week.
-
-### Tone instructions only
-
-*"Be more formal."* The loop needs *what* to do, not *how* to do
-it. If voice matters, fold it into a focused directive: *"Polish
-the executive summary of widget-x for a regulator audience —
-formal, third-person, UK English."*
-
-## Reviewing directive output
-
-After a directive-driven session lands:
-
-1. **Read the journal post.** Does the loop's understanding of the
-   directive match yours?
-2. **Walk the candidates in AIRGen.** Are the changes what you
-   asked for?
-3. **Check the gate state.** Did the session pass its gates?
-
-If the output doesn't match the directive, two reasons usually
-apply:
-
-- The directive was ambiguous. Refine and submit again.
-- The loop ran out of turns. Either continue with a follow-up
-  directive ("continue from where you left off, focusing on…") or
-  raise the turn budget.
-
-## Worked example: a week of directives
+## The five operator levers
 
 ```
-Mon  "Decompose STK-001 through STK-005 into system-requirements
-      under document `system-requirements`. 5–10 system requirements
-      per stakeholder need. Use EARS where applicable. Propose at
-      least one verification activity per system requirement."
-
-Wed  "Polish QA on the system-requirements created Mon–Tue. Target
-      median QA score 80. Wording-only changes; flag any requirement
-      that needs structural rework."
-
-Thu  "Validate substrate facts for the new system-requirements. Run
-      reconcile; surface any drift. Don't fix automatically — flag
-      for review."
-
-Fri  "Generate a one-page status summary for the project sponsor
-      covering this week's decomposition activity. 250 words.
-      Non-technical audience."
+STATUS    : Active / Inactive          (is this project in the loop at all?)
+MODE      : Auto / Manual              (scheduled vs operator-triggered?)
+WORKFLOW  : <dropdown>                 (which pipeline runs?)
+DIRECTIVE : Resume | Run Now | Force QC (what should the next session do?)
+WORKFLOW  ← Back | Next →              (manual phase stepping)
 ```
 
-A focused week. Each directive has a clear scope, target, and
-audience. The loop produces useful work; the operator reviews it
-once a day.
+That's the entire surface. There is no free-text "tell the loop what
+to do next" field. Free-text guidance only enters the system through
+**workflow config files** (file-based, dev work) — operators direct
+behaviour by *choosing* among existing workflows and pressing the
+right button.
+
+## STATUS — is the project in the loop?
+
+| Setting     | Behaviour                                              | Use when                                       |
+| ----------- | ------------------------------------------------------ | ---------------------------------------------- |
+| **Active**  | Harness scheduler considers this project.              | Most of the time — a project under active work. |
+| **Inactive** | Harness ignores this project completely.              | Dormant projects, projects awaiting external input, post-baseline freeze. |
+
+Setting STATUS to Inactive is the cleanest way to take a project out
+of the loop without losing its data — flip it back to Active when
+you're ready to resume.
+
+## MODE — Auto vs Manual
+
+| Setting    | Behaviour                                                  | Use when                                                            |
+| ---------- | ---------------------------------------------------------- | ------------------------------------------------------------------- |
+| **Auto**   | Sessions are scheduled automatically.                      | Steady-state autonomous operation.                                  |
+| **Manual** | No scheduled sessions; sessions only run on **Run Now**.   | Reviewing output before more accumulates; cost-controlled work; debugging. |
+
+Auto + Active is the normal state. Manual + Active is "I'll trigger
+sessions myself." Inactive (regardless of MODE) means nothing
+happens.
+
+## WORKFLOW — which pipeline runs
+
+The WORKFLOW dropdown picks which pre-defined pipeline runs in the
+next session. Typical options on AIRGen projects:
+
+| Workflow              | Purpose                                                                |
+| --------------------- | ---------------------------------------------------------------------- |
+| **Full Decomposition** | The end-to-end pipeline: concept → scaffold → decompose → QC → validate → review. Runs every phase in sequence. |
+| **Tech Author**       | Polish wording for human audiences. No structural changes.             |
+| **Validation**        | Validate substrate facts and trace coverage; surface drift.            |
+| **Red Team**          | Adversarial review pass — find unmitigated paths and gaps.             |
+
+The exact list depends on your harness config. Pick the workflow that
+matches the work you want done next; the harness's state machine then
+runs the phases in that workflow.
+
+> **Switching workflows mid-stream is normal.** A typical project
+> cycles: Full Decomposition for initial buildout → Validation when
+> the structure stabilises → Tech Author when language is the focus
+> → Red Team before a baseline → back to Validation if Red Team
+> surfaces issues.
+
+## The three directive buttons
+
+Each button issues one of three state-machine signals to the harness.
+
+### Resume
+
+| Button     | Effect                                          |
+| ---------- | ----------------------------------------------- |
+| **Resume** | Lift any pause; let the scheduler run normally. |
+
+Resume is the default. Use it after a pause when you're ready for
+the loop to continue on its own.
+
+### Run Now
+
+| Button       | Effect                                                  |
+| ------------ | ------------------------------------------------------- |
+| **Run Now**  | Trigger a session immediately, ignoring the schedule.   |
+
+Run Now is for operator-driven cadence. Use it when:
+
+- You've just changed the WORKFLOW dropdown and want the new
+  workflow to start now.
+- You're in Manual mode and need a session.
+- You're debugging and want a fresh session against the current
+  state.
+
+### Force QC
+
+| Button       | Effect                                                          |
+| ------------ | --------------------------------------------------------------- |
+| **Force QC** | Force a Quality Check phase as the next session.                |
+
+Force QC is the focused-quality lever. Use it when:
+
+- A failing
+  [Quality Gate](../../derive/guides/the-quality-view.md) needs
+  attention before more decompose / scaffold work.
+- You've manually fixed requirements and want the loop to re-run
+  its quality checks against the corrected state.
+- Output volume is fine but quality is sliding — Force QC
+  prioritises polish over generation.
+
+## Manual phase stepping
+
+The visual state machine on the Control Panel has **← Back** and
+**Next →** buttons. These let the operator manually move the
+project's state-machine pointer between phases without running a
+session — useful for:
+
+- **Skipping a phase that doesn't apply** (e.g. a tool-qualification
+  project that doesn't need a Red Team phase).
+- **Re-running an earlier phase** after fixing an upstream issue.
+- **Jumping to a specific phase** for targeted work.
+
+Manual stepping mostly comes up when MODE is Manual; in Auto mode
+the harness handles transitions itself.
+
+## Combinations that work
+
+A few canonical operator postures and the lever combinations that
+produce them.
+
+### "I want this project to run continuously."
+
+```
+STATUS   : Active
+MODE     : Auto
+WORKFLOW : Full Decomposition
+```
+
+The harness picks up sessions on its schedule and runs the full
+pipeline.
+
+### "I want to focus on quality before moving on."
+
+```
+STATUS   : Active
+MODE     : Auto (or Manual)
+WORKFLOW : (current)
+DIRECTIVE: Force QC
+```
+
+The next session is a focused QC phase. After it lands, the gate
+state on `/p/<slug>/quality` reflects the new state.
+
+### "Stop everything; I need to review."
+
+```
+STATUS   : Inactive
+```
+
+Cleanest way to halt. Switch back to Active when you're done.
+
+### "I'm reviewing — let me trigger sessions one at a time."
+
+```
+STATUS   : Active
+MODE     : Manual
+DIRECTIVE: Run Now (each time you want a session)
+```
+
+The harness only runs when you click Run Now.
+
+### "Polish wording for the customer review."
+
+```
+STATUS   : Active
+MODE     : Auto
+WORKFLOW : Tech Author
+```
+
+The harness runs the Tech Author pipeline — no structural changes,
+just language polish.
+
+### "I think the substrate has drifted from AIRGen."
+
+```
+STATUS   : Active
+MODE     : Auto
+WORKFLOW : Validation
+```
+
+The validation workflow runs `facts reconcile` and similar checks,
+surfacing drift in the journal post.
+
+### "Pre-baseline final pass."
+
+```
+STATUS   : Active
+MODE     : Manual
+WORKFLOW : Red Team
+DIRECTIVE: Run Now
+```
+
+A single adversarial-review session. Read the resulting journal
+post, then move on to baselining.
+
+## Antipatterns
+
+A few patterns to avoid.
+
+### Auto + Force QC repeatedly
+
+Force QC stacks: each press queues another QC. If the underlying
+problem is data-side (missing requirements, broken trace links),
+running Force QC twenty times won't help. Fix the data, then re-run.
+
+### Switching WORKFLOW without Run Now
+
+Changing the dropdown alone doesn't trigger a session — the next
+*scheduled* session uses it. If you want the change to take effect
+immediately, follow up with Run Now.
+
+### Leaving STATUS Active when the project's blocked
+
+If a project needs human input that hasn't arrived, switch STATUS
+to Inactive. Otherwise the harness keeps running sessions that
+can't make progress, accumulating cost and journal noise.
+
+### Skipping ahead via manual stepping without doing the phase
+
+Pressing **Next →** moves the pointer; it doesn't do the work the
+phase represents. If you skip Decompose without running it, the
+project arrives at QC with an empty decomposition and the gate
+fails.
+
+## What replaces "free-text directives"
+
+For free-text guidance, the path is **through Claude rather than
+through Derive**. Wire the AIRGen, Reify, and UHT Substrate MCP
+servers into Claude Desktop (see the
+[MCP tour](../../ecosystem/mcp-tour.md)), then have Claude
+manipulate the data directly:
+
+> *"In project widget-x, polish the QA score on every requirement in
+> document `system-requirements`. Don't change intent — only wording.
+> Submit each as a candidate."*
+
+Claude calls AIRGen's MCP tools to read, rewrite, and propose
+candidates. The autonomous loop is for sustained, scheduled work;
+Claude over MCP is for surgical, on-demand interventions.
 
 ## What's next
 
 - [Understanding a harness session](./understanding-a-harness-session.md)
 - [Reading session journals](./reading-session-journals.md)
 - [Driving the autonomous loop (Derive)](../../derive/guides/driving-the-autonomous-loop.md)
+- [The MCP tour: ten things to ask Claude](../../ecosystem/mcp-tour.md)

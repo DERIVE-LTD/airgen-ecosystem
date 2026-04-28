@@ -67,5 +67,5 @@ Common operator workflow:
 ## Next steps
 
 - _TODO: link to "Understanding a harness session: phases, gates, and outputs"_
-- _TODO: link to "Writing effective directives for the autonomous loop"_
+- [Steering the autonomous loop (STATUS, MODE, WORKFLOW, directives)](./guides/writing-effective-directives.md)
 - _TODO: link to "The relationship between harness sessions, AIRGen baselines, and substrate facts"_

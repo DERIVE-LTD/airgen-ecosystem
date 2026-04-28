@@ -115,9 +115,17 @@ If a session hits its turn budget without finishing, it ends and
 writes a journal post explaining what was incomplete. Operators can
 either:
 
-- Submit a directive to continue ("polish QA on the requirements
-  produced in session X"), or
+- Pick a more focused workflow from the WORKFLOW dropdown and
+  click **Run Now** so the next session continues against the
+  current state, or
 - Increase the turn budget for that phase in the workflow config.
+
+For surgical, free-text-style interventions ("polish QA on the
+requirements produced in session X"), use the AIRGen MCP server
+from Claude Desktop directly — see
+[the MCP tour](../../ecosystem/mcp-tour.md). The harness's job is
+the sustained autonomous pipeline; Claude over MCP handles
+operator-specific asks.
 
 ## Cost per session
 
@@ -165,7 +173,7 @@ Treat the harness as a focused worker, not a free agent.
 
 ## What's next
 
-- [Writing effective directives for the autonomous loop](./writing-effective-directives.md)
+- [Steering the autonomous loop](./writing-effective-directives.md)
 - [Reading session journals](./reading-session-journals.md)
 - [The relationship between harness sessions, AIRGen baselines, and substrate facts](./relationship-between-sessions-baselines-and-substrate-facts.md)
 - [Driving the autonomous loop (Derive)](../../derive/guides/driving-the-autonomous-loop.md)

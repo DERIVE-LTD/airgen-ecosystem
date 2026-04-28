@@ -58,6 +58,6 @@ Start here:
 In-depth guides:
 
 - [Understanding a harness session: phases, gates, and outputs](./guides/understanding-a-harness-session.md)
-- [Writing effective directives for the autonomous loop](./guides/writing-effective-directives.md)
+- [Steering the autonomous loop (STATUS, MODE, WORKFLOW, directives)](./guides/writing-effective-directives.md)
 - [Reading session journals](./guides/reading-session-journals.md)
 - [The relationship between harness sessions, AIRGen baselines, and substrate facts](./guides/relationship-between-sessions-baselines-and-substrate-facts.md)
