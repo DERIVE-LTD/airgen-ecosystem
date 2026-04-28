@@ -9,17 +9,24 @@ each section and what to look for in a one-minute health-check.
 > **Prerequisites:** access to a Derive instance and a project to
 > open. If you've never used Derive, start with
 > [the getting-started guide](../getting-started.md).
+>
+> Screenshots in this guide are taken from the public read-only
+> demo at [`derive.airgen.studio/demo`](https://derive.airgen.studio/demo).
 
 ## Page layout
 
 The dashboard is a single scrollable column titled `Dashboard`. The
 left rail is the project chrome: a `← Projects` back link, the
 project title, a favourite-star toggle, a `Search ⌘K` palette
-button, the six project tabs (Dashboard, Artifacts, Report, Log,
+button, the project tabs (Dashboard, Artifacts, Report, Log,
 Control, Downloads), and the signed-in user with a sign-out icon
 pinned to the bottom. A theme toggle (`◐ System`) sits in the
 bottom-right of the viewport. All dashboard content lives in the
 main pane.
+
+> Read-only / demo users see five tabs rather than six — the
+> `Control` tab is hidden because it would let them drive the
+> autonomous loop.
 
 Section headings render in ALL CAPS via CSS; this guide reproduces
 the UI casing so readers can find each section by sight.
@@ -34,6 +41,8 @@ In top-to-bottom order, the dashboard sections are:
 6. **RECENT SESSIONS** — latest journal entries.
 
 ## WORKFLOW
+
+![Workflow card with nine phase rows; the active phase is marked with an amber half-circle and a `current` tag](images/dashboard/workflow.png)
 
 The Workflow card visualises the harness state machine for this
 project as a vertical list of phase rows, in this order:
@@ -69,6 +78,8 @@ in the pipeline the autonomous loop currently is.
 
 ## Metric tiles
 
+![Eight metric tiles (4×2) above the HARNESS strip](images/dashboard/metrics.png)
+
 Eight tiles, four-by-two, with the project's headline counters. The
 labels are rendered in small caps:
 
@@ -91,17 +102,23 @@ journal or run an `airgen diff` against a previous baseline.
 A small status strip with four fields:
 
 - **Timer** — `running` or `paused`. The harness scheduler state.
-- **Sessions** — total sessions ever run for this project.
+- **Sessions** — total sessions ever run on this Derive instance.
 - **Last Cost** — Claude API cost of the most recent session.
 - **Directive** — the current standing directive (e.g. `PAUSE`,
   `RESUME`, or a directive name).
 
-Use this for cost tracking and to confirm at a glance that the
-loop is doing what you expect. If `Timer` and `Directive` appear
-to disagree (e.g. `Timer running` with `Directive PAUSE`), the
-directive applies on the next scheduler tick — they will reconcile.
+The HARNESS strip reflects **instance-wide** harness state, not
+per-project counters: the same Sessions count, Last Cost, Timer
+state and Directive are shown on every project's dashboard. Use
+it for cost tracking and to confirm at a glance that the loop is
+doing what you expect across the whole instance. If `Timer` and
+`Directive` appear to disagree (e.g. `Timer running` with
+`Directive PAUSE`), the directive applies on the next scheduler
+tick — they will reconcile.
 
 ## SAFETY REGIME
+
+![Safety Regime card with the NONE badge, three top-row fields, and three bordered sub-tiles](images/dashboard/safety-regime.png)
 
 The safety regime card has a status badge in the top-right corner
 (`NONE`, `SET`, or `CONFIRMED`) and a six-field grid: three fields
@@ -133,6 +150,8 @@ Follow that guidance to set the regime via a harness session.
 
 ## SPEC TREE
 
+![Spec Tree table with SUBSYSTEM, LEVEL, STATUS columns and a Full report link in the top-right](images/dashboard/spec-tree.png)
+
 The bottom of the dashboard shows the project's spec-tree as a
 table with three columns:
 
@@ -158,9 +177,10 @@ Each row shows:
 
 - The **session title** (left).
 - An optional **phase tag** (right, e.g. `Review`, `QC`,
-  `Decompose`) — present on sessions whose flow corresponds to a
-  workflow phase; absent on sessions that don't (e.g. one-off
-  remediation passes).
+  `Decompose`, `Tech Author`, `Reqs Eng`, `MBSE`) — present on
+  sessions whose flow corresponds to a workflow phase or named
+  flow; absent on sessions that don't (e.g. one-off remediation
+  passes).
 - The **session date** (`YYYY-MM-DD`).
 
 Outcome (ok / partial / failed) is **not** shown on the dashboard;
