@@ -3,7 +3,7 @@
 Reify visualises the structured systems-engineering data produced by
 [Derive](../derive/) and held in [AIRGen](../airgen/). This guide walks
 through opening a project, reading its diagrams, and editing the SysML
-v2 source.
+v2 source safely with the workspace + dry-run flow.
 
 > **Prerequisites:**
 >
@@ -46,29 +46,79 @@ Open `/sysml`. The CodeMirror editor shows the project's SysML v2
 source. Edit it and switch to any diagram view — the diagram re-renders
 from your edits.
 
-_TODO: screenshot of the editor + diagram side-by-side._
+Reify maintains two distinct sources for each project:
 
-## 5. Try the API
+- **Canonical** — reconstructed from the substrate knowledge graph and
+  AIRGen requirements. This is the truth.
+- **Workspace** — your in-progress edits. Workspaces are private to
+  your session until committed.
 
-Reify exposes a Bearer-token-authenticated read-only HTTP API:
+When the workspace differs from canonical, the project shows a **drift**
+indicator. You can dry-run, commit, or discard at any time.
+
+_TODO: screenshot of the editor showing the drift indicator._
+
+## 5. Dry-run before committing
+
+Before any change becomes part of the canonical model, run a **dry-run**.
+A dry-run parses your SysML, diffs it against the substrate and AIRGen
+state, and runs pre-commit checks — but applies nothing.
+
+This is the recommended way to:
+
+- Catch parser errors early
+- Preview which substrate facts and AIRGen requirements your edit
+  would create, update, or delete
+- Validate that no existing trace links would dangle
+
+## 6. Try the API
+
+Reify exposes the same data through a Bearer-token-authenticated HTTP API.
 
 ```sh
 curl -H "Authorization: Bearer rfy_..." \
      https://reify.airgen.studio/api/v1/projects/<slug>
 ```
 
-The same data is also available over MCP — install the
-`@derive-ltd/reify` CLI and call any tool by name:
+Or, more conveniently, use the `@derive-ltd/reify` CLI:
 
 ```sh
+export REIFY_API_URL=https://reify.airgen.studio
+export REIFY_API_TOKEN=rfy_...
+
 npx @derive-ltd/reify reify list-projects
 npx @derive-ltd/reify reify get-diagram <slug> --type=bdd
 ```
 
-To generate an API token, see the Reify project README.
+To generate an API token, ask the operator of your Reify instance to
+run `app/scripts/generate-api-token.ts`. The plaintext is shown once;
+only a sha256 hash is stored.
+
+## 7. Connect Claude Desktop (optional)
+
+The same MCP surface plugs into Claude Desktop. Add the following to
+`claude_desktop_config.json`:
+
+```json
+{
+  "mcpServers": {
+    "reify": {
+      "command": "npx",
+      "args": ["-y", "@derive-ltd/reify"],
+      "env": {
+        "REIFY_API_URL": "https://reify.airgen.studio",
+        "REIFY_API_TOKEN": "rfy_paste_your_token_here"
+      }
+    }
+  }
+}
+```
+
+Restart Claude Desktop and the Reify tools appear in the tool picker.
 
 ## Next steps
 
 - _TODO: link to "Reading a Requirements (REQ) diagram" guide_
-- _TODO: link to "Editing SysML v2 source" guide_
+- _TODO: link to "Editing SysML v2 source: workspace, dry-run, and commit"_
 - _TODO: link to "Using the Reify MCP server from Claude Desktop"_
+- _TODO: link to "Embedding `sysml-reactflow` in your own application"_

@@ -12,8 +12,8 @@ MCP server for programmatic and agentic access.
 - **Stack:** Next.js 16 (App Router) on React 19, Tailwind 4,
   CodeMirror 6, React Flow 12, ELK.js, Mermaid 11
 - **Published packages:**
-  - `sysml-reactflow` — open-source React component library for SysML v2
-  - `@derive-ltd/reify` — MCP server and CLI for the public API
+  - [`sysml-reactflow`](https://www.npmjs.com/package/sysml-reactflow) — open-source React component library for SysML v2 ([live Storybook](https://hollando78.github.io/SysML-reactflow/))
+  - [`@derive-ltd/reify`](https://www.npmjs.com/package/@derive-ltd/reify) — MCP server (`reify-mcp`) and CLI (`reify`)
 
 ## What Reify does
 
@@ -22,9 +22,11 @@ MCP server for programmatic and agentic access.
 | Live SysML v2 editor        | Edit the SysML source in CodeMirror, watch diagrams re-render.       |
 | Fourteen views              | One canonical diagram per system aspect, plus tabular and overview.  |
 | ELK auto-layout             | Hands-free layered layout that handles realistic system sizes.       |
-| OMG SysML v2.0 coverage     | 68 node types and 35 edge types from the OMG specification.          |
-| HTTP API                    | Read-only `/api/v1/*` over Bearer-token auth.                        |
-| MCP server                  | Same surface, also available as `@derive-ltd/reify` CLI.             |
+| OMG SysML v2.0 coverage     | 60+ element types and 30+ edge types from the OMG specification.     |
+| Workspace + dry-run         | Edit, diff, validate against substrate + AIRGen — apply nothing.     |
+| HTTP API (`/api/v1`)        | Read-only, Bearer-token auth, never returns bare arrays.             |
+| MCP server                  | Same surface, exposed at `/mcp` and as a CLI (`@derive-ltd/reify`).  |
+| Audit trail                 | `WORKSPACE_COMMIT` history per project, newest first.                |
 | GitHub OAuth                | Sign in with GitHub; tokens hashed at rest.                          |
 
 ## Views
@@ -49,33 +51,58 @@ Each project lives at `/p/<slug>/`. The available views are:
 | `/sessions` | Agent session history         | per-project Claude runs                    |
 
 The view system is data-driven: each project page reads its SysML v2
-source, parses it once, and renders any of the views above on demand.
+source, parses it once, caches the AST in IndexedDB, and renders any of
+the views above on demand.
 
 ## Programmatic access
 
-### HTTP
+### HTTP API
+
+Routes live under `/api/v1/*`. Two auth methods, checked in this order:
+
+1. **Bearer token** — `Authorization: Bearer rfy_...`
+2. **Cookie session** — the same session cookie the UI uses
+
+All v1 tokens carry the `read` scope; writes are not exposed in v1.
 
 ```sh
+# Project list
 curl -H "Authorization: Bearer rfy_..." \
-     https://reify.airgen.studio/api/v1/projects/<slug>
+     https://reify.airgen.studio/api/v1/projects
+
+# A BDD diagram, scoped to a subsystem
+curl -H "Authorization: Bearer rfy_..." \
+     "https://reify.airgen.studio/api/v1/projects/<slug>/diagrams/bdd?scope=Power%20Subsystem"
+
+# Dry-run a SysML edit (parses, diffs against substrate + AIRGen,
+# runs pre-commit checks — applies nothing)
+curl -X POST -H "Authorization: Bearer rfy_..." \
+     -H "Content-Type: application/json" \
+     -d '{"sysml": "package X { part def P { } }"}' \
+     https://reify.airgen.studio/api/v1/projects/<slug>/workspace/dry-run
 ```
 
-The API view of a project is identical to the UI view — both are
-served by the same data-access functions.
+The full surface covers projects, SysML (canonical and workspace), views,
+diagrams (`bdd`, `ibd`, `act`, `saf`, `req`, `stm`, `cxd`, `uc`, `ffd`),
+requirements, trace links, raw substrate facts, workspace state, dry-run,
+and audit history.
 
-### MCP / CLI
+### MCP server / CLI
 
-The same surface is exposed via MCP. The `@derive-ltd/reify` package
-ships an MCP server (`reify-mcp`, stdio transport) and a `reify` CLI
-that calls the remote `/mcp` endpoint:
+The same data is exposed via MCP at `/mcp`. The `@derive-ltd/reify`
+package ships an MCP server (stdio) and a `reify` CLI:
 
 ```sh
+export REIFY_API_URL=https://reify.airgen.studio
+export REIFY_API_TOKEN=rfy_...
+
 npx @derive-ltd/reify reify list-projects
 npx @derive-ltd/reify reify get-diagram <slug> --type=bdd --scope="Power Subsystem"
+npx @derive-ltd/reify reify list-tools         # introspect available tools
 ```
 
-CLI command names mirror the MCP tool names — new tools appear in
-`reify list-tools` with no client-side changes.
+CLI command names mirror MCP tool names — new server-side tools appear
+automatically with no client changes.
 
 ## Guides
 
@@ -86,7 +113,7 @@ Planned topics:
 
 - Reading a Requirements (REQ) diagram
 - Reading a Safety (SAF) diagram
-- Editing SysML v2 source and watching diagrams update
+- Editing SysML v2 source: workspace, dry-run, and commit
 - Using the Reify HTTP API
 - Using the Reify MCP server from Claude Desktop
 - Embedding `sysml-reactflow` in your own application
