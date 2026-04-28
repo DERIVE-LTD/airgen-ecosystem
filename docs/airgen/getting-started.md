@@ -56,7 +56,7 @@ Compare two baselines to see exactly what has changed between them.
 ## Next steps
 
 - _TODO: link to "Authoring requirements that score well" guide_
-- _TODO: link to "Using the AIRGen CLI" guide_
+- _TODO: link to "Using the `@derive-ltd/airgen-cli` CLI" guide_
 - _TODO: link to "Connecting AIRGen to Claude via MCP" guide_
 
 If you are evaluating self-hosted AIRGen, see _TODO: link to
