@@ -2,7 +2,7 @@
 
 Derive is the operator workbench for AIRGen projects. This guide walks
 through opening a project, reading the dashboard, and using the
-quality view, journal, and loop controls.
+Quality Gates view, Log, and Control Panel.
 
 > **Prerequisites:**
 >
@@ -28,7 +28,7 @@ the most useful starting tabs are:
 
 - **Dashboard** — spec-tree, headline metrics, safety-regime card.
 - **Quality** — lint findings, orphans, ambiguous requirements, gate state.
-- **Journal** — session-log feed for this project.
+- **Log** — session-log feed for this project (route `/journal`).
 - **Report** — long-form generated report.
 
 _TODO: screenshot of the per-project dashboard._
@@ -56,20 +56,32 @@ output is ready to ship, needs another iteration, or needs a directive.
 ## 5. Drive the autonomous loop
 
 The autonomous loop is run by a Claude-driven orchestrator behind
-Derive (the Claude Harness). Derive exposes the controls:
+Derive (the Claude Harness). Derive exposes the controls in two
+Control Panels:
 
-- `/control` — global pause / unpause and directive submission
-- `/p/<slug>/control` — per-project loop controls
+- `/control` — global view: harness status and every project's row
+- `/p/<slug>/control` — per-project Control Panel
 
-Use these to pause the loop while you review, submit a directive
-("focus on hazard analysis next"), or unpause once you're happy.
+The per-project Control Panel offers:
 
-_TODO: screenshot of the loop control panel._
+- **STATUS** toggle (Active / Inactive) — whether the loop picks
+  this project up.
+- **MODE** toggle (Auto / Manual) — scheduled vs operator-triggered.
+- **WORKFLOW** dropdown — which workflow runs.
+- Three directive buttons: **Resume**, **Run Now**, **Force QC**.
+- Manual phase stepping with **← Back** / **Next →** for the
+  state machine.
+- Email subscription form for session log notifications.
+- Activity audit feed.
 
-## 6. Read the journal
+For details, see
+[Driving the autonomous loop](./guides/driving-the-autonomous-loop.md).
 
-Each loop session writes a markdown post to the journal. Derive renders
-those posts at:
+## 6. Read the Log
+
+Each loop session writes a markdown post that Derive renders in the
+Session Log (the nav-rail item is labelled "Log"; the route is still
+`/journal`):
 
 - `/journal` — cross-project feed
 - `/p/<slug>/journal` — per-project feed

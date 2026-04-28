@@ -20,13 +20,13 @@ turns that data into something an engineer can drive.
 
 | Capability                  | Summary                                                                          |
 | --------------------------- | -------------------------------------------------------------------------------- |
-| Per-project dashboard       | Spec-tree, key metrics, safety-regime card.                                      |
-| Quality view                | Lint findings, orphans, ambiguous requirements, gate state.                      |
-| Report viewer               | Long-form generated reports rendered inline.                                     |
-| Session journal             | Cross-project and per-project session feeds rendered from markdown.              |
-| Loop control panel          | Pause / unpause the autonomous loop and issue directives, per project or globally. |
+| Per-project dashboard       | Workflow state machine, eight metric tiles, harness telemetry, safety regime, spec-tree, recent sessions. |
+| Quality Gates               | Harness gate state per project (direct URL `/quality`; not in nav rail).         |
+| Report viewer               | Long-form generated System Decomposition Report rendered inline.                 |
+| Session Log                 | Per-project and cross-project session-log feed (URL `/journal`, UI label "Log"). |
+| Control Panel               | STATUS / MODE / WORKFLOW selectors, three directive buttons (Resume, Run Now, Force QC), manual phase stepping, email subscriptions, activity audit. |
 | Artefacts and downloads     | Word, PDF, Excel exports; baseline bundles.                                      |
-| Public demo                 | Read-only demo project at `/demo` for evaluation.                                |
+| Public demo                 | `/demo` route for evaluation (resolves to a designated demo project).            |
 | Admin                       | Project and user management, per-project roles, analytics.                       |
 | OAuth + PWA                 | GitHub and Google sign-in; installable as a PWA with push notifications.         |
 
@@ -46,20 +46,25 @@ src/routes/
 ├── /                      Landing
 ├── /admin/                Admin tools (project/user management, analytics)
 ├── /auth/                 OAuth + session
-├── /control/              Loop control panel (pause/unpause, directives)
-├── /demo/                 Public read-only demo project
-├── /journal/              Cross-project session-log feed
+├── /control/              Global Control Panel — harness status, all projects
+├── /demo/                 Public demo route — resolves to a designated project
+├── /journal/              Cross-project session-log feed (UI label "Log")
 ├── /login/                Sign-in
 └── /p/[slug]/             Per-project workspace
     ├── artifacts/         Generated artefacts (Word/PDF, baselines)
-    ├── control/           Per-project loop controls
-    ├── dashboard/         Spec-tree, metrics, safety regime
+    ├── control/           Per-project Control Panel
+    ├── dashboard/         Project overview — workflow, metrics, harness, regime, spec-tree
     ├── downloads/         Bundle/PDF/Excel exports
     ├── init/              Bootstrap a fresh project
-    ├── journal/           Per-project session feed
-    ├── quality/           Lint, orphans, ambiguous reqs, gate state
-    └── report/            Long-form report viewer
+    ├── journal/           Per-project Session Log (UI label "Log")
+    ├── quality/           Quality Gates — harness gate state (not in nav rail)
+    └── report/            Long-form System Decomposition Report
 ```
+
+Per-project navigation rail items: **Dashboard**, **Artifacts**,
+**Report**, **Log** (which routes to `/journal`), **Control**,
+**Downloads**. The `/quality` and `/init` routes are reachable by
+direct URL but are not surfaced in the rail.
 
 ## Guides
 
@@ -70,8 +75,8 @@ Start here:
 In-depth guides:
 
 - [Reading the per-project dashboard and spec-tree](./guides/reading-the-per-project-dashboard.md)
-- [The quality view: lint findings, orphans, gate state](./guides/the-quality-view.md)
-- [Driving the autonomous loop: pause, unpause, and directives](./guides/driving-the-autonomous-loop.md)
+- [The Quality Gates view](./guides/the-quality-view.md)
+- [Driving the autonomous loop: STATUS, MODE, and directives](./guides/driving-the-autonomous-loop.md)
 - [Working with baselines and artefact bundles](./guides/working-with-baselines-and-artefact-bundles.md)
 - [Managing per-project roles and user access](./guides/managing-per-project-roles-and-user-access.md)
 - [Publishing a public read-only demo project](./guides/publishing-a-public-read-only-demo-project.md)

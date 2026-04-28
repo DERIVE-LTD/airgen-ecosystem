@@ -1,144 +1,117 @@
-# The quality view: lint findings, orphans, gate state
+# The Quality Gates view
 
-The quality view at `/p/<slug>/quality` is where Derive answers the
-question "is this project ready to ship the next deliverable?". It
-aggregates AIRGen lint results, orphan trace links, ambiguity
-detections, and the current quality gate state into one screen.
+`/p/<slug>/quality` shows the **Quality Gates** for a project — the
+harness's machine-checkable thresholds that gate state-machine
+progression. It's a focused view: gate state only. Other
+quality-of-project signals (lint findings, orphan trace links,
+ambiguous requirements) live in adjacent tools rather than this
+page.
 
-This guide walks through the panels, explains the gate model, and
-suggests a working pattern for reaching a clean view.
+> **Note:** Quality Gates is **not** linked from the navigation rail.
+> Navigate to it directly via the URL `/p/<slug>/quality`. This is
+> intentional — gates are operationally important during harness
+> sessions but rarely the right place to land for everyday review.
 
-> **Prerequisites:** a Derive project with at least some
-> requirements. The view assumes the AIRGen lint engine has run
-> recently; trigger a fresh run from the
-> [CLI](../../airgen/guides/using-the-airgen-cli.md) if needed.
+> **Prerequisites:** a Derive project. The page is empty until the
+> harness has run gate evaluations for the project.
 
-## Panels at a glance
+## What gates are
 
-The quality view has four panels:
+A quality gate is a single yes/no condition the harness evaluates
+between phases of its state machine. Examples:
 
-1. **Gate state.** Pass / fail / blocked, with the conditions.
-2. **Lint findings.** Output of `airgen lint` plus regime-aware
-   safety rules.
-3. **Orphans.** Requirements with no incoming or outgoing trace
-   links.
-4. **Ambiguous requirements.** Requirements where the QA engine
-   couldn't classify the EARS pattern, or detected ambiguous
-   wording.
+- "All requirements have a QA score ≥ 70."
+- "All hazards have at least one mitigating requirement."
+- "No new orphan trace links since the last baseline."
+- "Verification coverage ≥ 90 % across system requirements."
 
-## The gate
+When a gate fails, the harness's state machine refuses to progress
+to the next phase. This keeps the autonomous loop from accumulating
+tech debt — it has to fix the failing gate before moving on.
 
-The quality gate is a binary "ready or not" verdict, computed from a
-project-configurable rule set. A typical gate definition for a
-SIL-rated project:
+The page summarises each gate's most recent evaluation:
 
-```
-Gate: SIL-2 ready
-─────────────────
-✓  All requirements have a QA score ≥ 70
-✓  No orphan requirements
-✗  All hazards have at least one mitigating requirement
-✓  All mitigating requirements have at least one verification activity
-✗  All verification activities have passed evidence
-```
+- **Name and description.**
+- **Pass / fail status.**
+- **The metric vs the threshold** (e.g. `QA score median: 67 / 70`).
+- **The phase that last evaluated it.**
+- **Timestamp** of the last evaluation.
 
-The two failing rows would block the gate. Fix them, re-run, and
-the gate goes green.
+When no harness sessions have run yet, the page shows:
 
-Different regimes have different gates. A research project might
-have a much looser gate (just QA score). A DO-178C DAL-A project
-might have a much tighter one (every requirement traced to a
-software architectural element with passing evidence).
+> *No quality gate data available. Gates are evaluated for the
+> active project during harness sessions.*
 
-## Lint findings
+That empty state means "run a session" — it's not an error.
 
-`airgen lint` classifies every domain concept in your requirements
-through UHT Substrate and surfaces ontological mismatches:
+## How gates relate to the rest of the project
 
-- **Ontological mismatch.** A requirement attaches a physical
-  property (e.g. weight) to a non-physical entity (e.g. a state).
-- **Missing statistical parameters.** An abstract metric (mean time
-  between failures, error rate) given without a confidence
-  interval.
-- **Mode-without-criteria.** A degraded operating mode declared
-  without performance criteria.
-- **Verification mixed with functional.** A requirement that is
-  partly behaviour, partly verification.
-- **Ontological ambiguity.** Two concepts in the same requirement
-  that disagree on classification.
-- **Missing modal verb.** Requirement without "shall".
+Gates are configured per project in the harness workflow config
+(operator-only). Different regimes have different gates: a
+SIL-2 project's gate might require certain document-level coverage
+and verification activity counts that a research project's would
+not.
 
-Each finding has a one-line summary and a suggestion. Click for the
-context — which requirements are affected, what the suggested
-rewording is.
+Gates differ from these adjacent project-quality concepts:
 
-The findings are **regime-aware**. A tool-qualification project
-doesn't get SIL warnings; a research project doesn't get DO-178C
-warnings.
+| Concept           | Where it lives                              |
+| ----------------- | ------------------------------------------- |
+| **Quality gates** | Harness, evaluated per session. This page. |
+| **QA score**      | AIRGen, per requirement. The dashboard's metric tiles aggregate it. |
+| **Lint findings** | AIRGen `airgen lint`. Run separately; output to terminal or markdown report. |
+| **Orphan trace links** | AIRGen `airgen report orphans`. Or via `airgen reqs filter`. |
+| **Ambiguous requirements** | AIRGen QA panel per requirement, plus aggregate via `airgen report quality`. |
 
-## Orphans
+So if you want a one-screen "is this project ready?" view, you'll
+typically need to combine the Quality Gates page with `airgen
+report` outputs.
 
-A requirement is an orphan if it has no incoming or no outgoing
-trace links. The orphan panel groups them:
+## Acting on a failed gate
 
-- **No parent.** Requirement isn't derived from anything (often a
-  stakeholder need that should be linked, or a derived requirement
-  that lost its parent in a refactor).
-- **No child.** Requirement isn't refined further (often a bottom-of-
-  hierarchy node, but sometimes a missing decomposition).
-- **No verification.** Requirement has no `verifies` link from a
-  verification activity.
+When a gate is failing, the typical workflow:
 
-Each entry includes the requirement reference, document, and a
-quick-action button to add the missing link.
+1. **Read the gate detail.** What's the metric, what's the
+   threshold, why is it short?
+2. **Run the relevant AIRGen report.**
+   - QA score gate failing → `airgen report quality <tenant>
+     <project>`.
+   - Coverage gate failing → `airgen verify matrix`.
+   - Orphan gate failing → `airgen report orphans`.
+3. **Address the underlying data.**
+4. **Switch the WORKFLOW** on `/p/<slug>/control` to one that
+   addresses the failing gate (e.g. a polish or QC workflow), or
+   click **Force QC** for an immediate quality pass.
+5. **Wait for the next session.** It re-evaluates the gate.
+6. **Re-check the Quality Gates page.** When all gates pass, the
+   harness can progress to the next phase.
 
-## Ambiguous requirements
+## Why gates aren't in the nav rail
 
-These are requirements the QA engine flagged as:
+The page is operationally useful but the typical operator workflow
+doesn't start there — it starts on the Dashboard or the Log. So
+Derive keeps the rail short and lets you reach Quality Gates by
+direct URL when the situation calls for it.
 
-- **EARS pattern ambiguous.** Multiple plausible classifications
-  (could be event-driven or state-driven).
-- **Trigger / response unclear.** The sentence structure doesn't
-  cleanly separate the two.
-- **Quantification missing.** Numeric thresholds without units or
-  measurement window.
+If your team uses gates heavily, consider bookmarking
+`https://derive.airgen.studio/p/<slug>/quality` in your browser.
 
-Treat these as a refactor backlog. Each fix improves the QA score
-and the diagram clarity in Reify (the REQ diagram colour-codes by
-QA bucket — fewer ambiguous nodes makes for a calmer diagram).
+## Driving improvements from outside this page
 
-## A working pattern
+Most of the work to *make* gates pass happens elsewhere:
 
-A clean quality view doesn't happen by accident. The pattern that
-works:
+- **Authoring / polishing requirements** — AIRGen web UI or
+  `airgen reqs` CLI commands.
+- **Adding trace links** — AIRGen UI or `airgen trace create`.
+- **Adding verification activities** — AIRGen `airgen verify`
+  commands.
+- **Issuing directives to the harness** — Derive `/p/<slug>/control`.
 
-1. **Run `airgen lint` weekly.** It's cheap. Catch ontological
-   issues while they're small.
-2. **Walk the orphan list before reviews.** Resolve each entry —
-   either link, mark as intentionally untraced, or delete.
-3. **Sort ambiguous requirements by QA score.** The lowest-scoring
-   ambiguous ones give the biggest score lift per minute of effort.
-4. **Aim for green gate before baseline.** The gate is what stops a
-   weak deliverable shipping. If you baseline with the gate red, the
-   baseline carries the failure forward.
-
-## Driving the loop from the quality view
-
-If the quality view shows lots of fixable issues — orphans, low QA
-scores — the autonomous loop can probably help. Submit a directive
-to the loop (see [Driving the autonomous loop](./driving-the-autonomous-loop.md))
-like:
-
-> "Resolve orphan trace links in document `system-requirements`. For
-> each, propose a parent requirement in `stakeholder-requirements`
-> and a verification activity. Submit candidates."
-
-The loop will produce candidates — you accept or reject them in
-AIRGen, and the quality view updates.
+Quality Gates tells you *what's failing*. The fix happens in the
+upstream tools.
 
 ## What's next
 
 - [Reading the per-project dashboard](./reading-the-per-project-dashboard.md)
 - [Driving the autonomous loop](./driving-the-autonomous-loop.md)
-- [Working with baselines and artefact bundles](./working-with-baselines-and-artefact-bundles.md)
 - [Building a traceability matrix (AIRGen)](../../airgen/guides/building-a-traceability-matrix.md)
+- [Understanding the QA score and EARS patterns (AIRGen)](../../airgen/guides/understanding-the-qa-score-and-ears-patterns.md)
