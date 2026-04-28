@@ -143,6 +143,20 @@ informally (the Complete Specification Bundle is described as a
 For versioned snapshots and diffs, refer to the AIRGen-side
 tooling (CLI, `airgen` commands).
 
+## Example artefacts
+
+A point-in-time snapshot of the demo project's bundle is checked
+into
+[`examples/specification-bundle/2026-04-28-eeg-accessibility-buggy/`](../../../examples/specification-bundle/2026-04-28-eeg-accessibility-buggy/).
+ISO 15289 documents are included in their `.md` form so they
+render natively on github.com; the Cover Letter PDF and the Excel
+export are kept in their original binary form.
+
+For the full live bundle (including the larger PDF forms, the
+Engineering Log PDF, and the ReqIF), grab it from the demo
+project at
+[`derive.airgen.studio/p/se-eeg-accessibility-buggy/downloads`](https://derive.airgen.studio/p/se-eeg-accessibility-buggy/downloads).
+
 ## What's next
 
 - [Reading the per-project dashboard](./reading-the-per-project-dashboard.md)

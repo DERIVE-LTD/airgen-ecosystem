@@ -1,0 +1,14 @@
+EEG Accessibility Buggy — Specification Bundle
+Generated: 2026-04-28
+Classification: UNCLASSIFIED — SYNTHETIC DATA
+Producer: Derive by AIRGen (derive.airgen.studio)
+
+Contents:
+  00-Cover-Letter.pdf (70,122 bytes)
+  01-ConOps.pdf (323,445 bytes)
+  02-Requirements-Specification.pdf (176,258 bytes)
+  03-Design-Description.pdf (1,099,498 bytes)
+  04-Verification-Plan.pdf (259,356 bytes)
+  05-Requirements-Export.xlsx (121,584 bytes)
+  06-Requirements-Export.reqif (1,068,134 bytes)
+  07-Engineering-Log.pdf (2,159,017 bytes)
