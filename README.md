@@ -32,6 +32,8 @@ For how the five fit together, see the
 [ecosystem overview](docs/ecosystem/overview.md). For an interactive
 tour from inside Claude Desktop, see
 [ten things to ask Claude about your projects](docs/ecosystem/mcp-tour.md).
+For the install-and-go reference for the CLI / MCP packages on npm,
+see [`@derive-ltd` packages on npm](docs/ecosystem/npm-packages.md).
 
 ## Repository layout
 

@@ -179,3 +179,6 @@ to discuss your environment.
 - [Claude Harness documentation](../claude-harness/)
 - [Ten things to ask Claude about your projects](./mcp-tour.md) — a
   guided MCP tour across all three MCP-enabled components
+- [`@derive-ltd` packages on npm](./npm-packages.md) — install,
+  configuration, and Claude Desktop wiring for the published CLIs and
+  MCP servers
