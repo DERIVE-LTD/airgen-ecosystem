@@ -3,61 +3,69 @@
 The AIRGen ecosystem is five components working as one pipeline for
 AI-assisted, model-based systems engineering in regulated industries.
 
+## Two ways in
+
 ```
-                                ┌──────────┐
-                                │   USER   │
-                                └─────┬────┘
-                                      │ OAuth (browser)
-                                      ▼
-                       ┌─────────────────────────────┐
-                       │            DERIVE           │  Operator workbench
-                       │   The only UI to the loop   │  · dashboard
-                       │                             │  · journal
-                       │                             │  · quality view
-                       │                             │  · loop controls
-                       └────────┬──────────────┬─────┘
-                                │              │
-                       controls │              │ reads back
-                                ▼              │
-                       ┌─────────────────┐     │
-                       │  CLAUDE HARNESS │     │
-                       │   Autonomous    │     │
-                       │ engine; no UI   │     │
-                       │ · concept → ... │     │
-                       │ · ... → review  │     │
-                       └────┬────────┬───┘     │
-                            │        │         │
-                            │        │         │
-                     writes │        │ writes  │
-                     reqs + │        │ facts   │
-                     traces │        │ (SE:    │
-                            │        │ slug)   │
-                            ▼        ▼         │
-                   ┌─────────────┐  ┌──────────────────┐
-                   │   AIRGEN    │  │  UHT SUBSTRATE   │
-                   │ System of   │  │  Knowledge graph │ ◀── Derive reads
-                   │ record      │  │ · 32-bit taxonomy│      both stores
-                   │ · QA / EARS │  │ · namespaced     │      to render its
-                   │ · trace     │  │   facts          │      views
-                   │ · baselines │  │ · MCP/REST/CLI   │
-                   └──────┬──────┘  └────────┬─────────┘
-                          │                  │
-                          └────────┬─────────┘
-                                   │ both read by
-                                   ▼
-                       ┌─────────────────────────────┐
-                       │            REIFY            │  SysML v2 viewer
-                       │   Reads AIRGen + Substrate, │  · 14 views
-                       │   reconstructs SysML v2,    │  · live editor
-                       │   renders 14 views          │  · HTTP + MCP API
-                       └─────────────────────────────┘
+   ┌─────────────────────────┐             ┌────────────────────────────┐
+   │   Browser → Derive      │             │   Claude / any MCP client  │
+   │   (operator UI)         │             │   (programmatic, agentic)  │
+   └────────────┬────────────┘             └─────────────┬──────────────┘
+                │                                        │
+                ▼                                        │  MCP servers exposed by:
+   ┌──────────────────────────┐                          │  · AIRGen     (70 tools / 18 modules)
+   │           DERIVE         │                          │  · Reify      (~19 tools at /mcp)
+   │   Operator workbench —   │                          │  · UHT Substrate (classify, facts,
+   │   the only UI to the     │                          │                    search, …)
+   │   autonomous loop        │                          │
+   └─────────┬────────────────┘                          │
+             │ controls                                  │
+             ▼                                           │
+   ┌──────────────────────────┐                          │
+   │     CLAUDE HARNESS       │                          │
+   │   Autonomous engine;     │                          │
+   │   no UI, no MCP — only   │                          │
+   │   driven from Derive     │                          │
+   └────┬───────────┬─────────┘                          │
+        │           │                                    │
+        │ writes    │ writes                             │
+        │ reqs +    │ facts                              │
+        │ traces    │ (SE:slug)                          │
+        ▼           ▼                                    │
+   ┌──────────┐  ┌──────────────────┐ ◀──────────────────┤
+   │  AIRGEN  │  │  UHT SUBSTRATE   │                    │
+   │  System  │  │  Knowledge graph │                    │
+   │  of      │  │  · 32-bit        │                    │
+   │  record  │  │    taxonomy      │                    │
+   │          │  │  · namespaced    │                    │
+   │          │  │    facts         │                    │
+   └────┬─────┘  └────────┬─────────┘                    │
+        │                 │                              │
+        └────────┬────────┘                              │
+                 │ both read by                          │
+                 ▼                                       │
+   ┌──────────────────────────────┐  ◀───────────────────┘
+   │             REIFY            │
+   │  SysML v2 viewer + editor —  │
+   │  reads AIRGen + Substrate,   │
+   │  reconstructs SysML v2,      │
+   │  renders 14 views            │
+   └──────────────────────────────┘
 ```
 
-The harness has no user interface of its own. Every operator action —
-pause the loop, unpause, submit a directive, review what was produced
-— happens through Derive. The harness writes to AIRGen, UHT Substrate,
-and the journal filesystem; Derive reads back from all three to render
-the operator view; Reify reads AIRGen and UHT Substrate to render the
+There are two ways into the ecosystem and they are equally first-class:
+
+1. **Browser → Derive.** The operator workbench. Every action that
+   pauses, unpauses, or directs the harness — and every human review
+   of what the harness produced — happens here.
+2. **Claude / MCP client.** AIRGen, Reify, and UHT Substrate each
+   expose an MCP server, so the entire data plane is reachable
+   programmatically from Claude Desktop or any other MCP client. This
+   is the agentic / scripting / integration path.
+
+The harness itself has neither a UI nor an MCP surface. It is driven
+only by Derive, and only writes — to AIRGen, UHT Substrate, and the
+journal filesystem. Derive reads back from all three to render the
+operator view; Reify reads AIRGen and UHT Substrate to render the
 SysML v2 view.
 
 ## What each component owns
@@ -133,6 +141,9 @@ visualisation.
 | Derive ↔ UHT Substrate        | Substrate REST API for the spec-tree and namespace queries.                |
 | Reify ↔ AIRGen                | Reify reads requirements and trace links via the AIRGen REST API.          |
 | Reify ↔ UHT Substrate         | Reify reads namespaced facts via the Substrate REST API and reconstructs the canonical SysML v2 source from AIRGen + Substrate combined. |
+| Claude / MCP ↔ AIRGen         | AIRGen exposes 70 tools across 18 modules (`navigation`, `requirements`, `documents`, `traceability`, `baselines`, `architecture`, `ai`, `imagine`, …). |
+| Claude / MCP ↔ Reify          | Reify exposes a `/mcp` endpoint and a `@derive-ltd/reify` CLI/stdio server with ~19 read-only tools. |
+| Claude / MCP ↔ UHT Substrate  | Substrate exposes MCP tools for classification, comparison, search, entity management, fact CRUD, and namespace/reference lookups. |
 | Cross-app linking              | URL-based deep links between Derive, AIRGen, and Reify.                    |
 
 ## Adoption paths
@@ -149,6 +160,11 @@ You do not need all five components to get value:
 4. **Full ecosystem** — for teams adopting AI-assisted decomposition
    and enrichment from stakeholder needs through to SysML v2 models,
    with Derive as the operator interface.
+
+In every adoption path, the user-facing components also expose MCP
+servers, so any combination is reachable programmatically from Claude
+Desktop or another MCP client. This is the agentic / scripting /
+integration path that runs alongside the browser UI.
 
 Self-hosted, hosted SaaS, and managed enterprise deployments are
 available for each path. Contact [Derive Ltd](https://derive-ltd.co.uk)
