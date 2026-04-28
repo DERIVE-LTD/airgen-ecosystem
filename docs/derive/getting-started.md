@@ -12,57 +12,58 @@ Quality Gates view, Log, and Control Panel.
 > - At least one project visible to your account
 
 If you just want to look around without signing in, the public
-read-only demo lives at `/demo`.
+read-only demo lives at [`/demo`](https://derive.airgen.studio/demo).
 
 ## 1. Sign in
 
-Sign in with GitHub or Google. An admin must associate your account
-with the projects you should see.
-
-_TODO: screenshot of the sign-in screen._
+Sign in with GitHub or Google. Tenant admins associate accounts
+with the projects they should see; if you have no projects after
+signing in, contact your admin.
 
 ## 2. Open a project
 
-Each project lives at `/p/<slug>/`. From the project landing page,
-the most useful starting tabs are:
+Each project lives at `/p/<slug>/`. The per-project navigation rail
+exposes six tabs (five for read-only / demo users — Control is
+hidden):
 
 - **Dashboard** — spec-tree, headline metrics, safety-regime card.
-- **Quality** — lint findings, orphans, ambiguous requirements, gate state.
+- **Artifacts** — content browser for requirements, documents,
+  diagrams, traces, and orphans.
+- **Report** — long-form generated System Decomposition Report.
 - **Log** — session-log feed for this project (route `/journal`).
-- **Report** — long-form generated report.
+- **Control** — operator controls for the autonomous loop
+  (signed-in operators only).
+- **Downloads** — exports and document bundles.
 
-_TODO: screenshot of the per-project dashboard._
+There's also a **Quality Gates** view at `/p/<slug>/quality` —
+useful but not surfaced in the rail.
 
 ## 3. Read the dashboard
 
-The dashboard is the single-screen overview: the spec-tree on the left,
-key metrics in the middle, and a safety-regime card that tells you
-which standard the project is being evaluated against (tool-qualification,
-SIL-rated, etc.). Use it to sanity-check that the project's data is
-coherent before drilling into details.
+The dashboard is the single-screen overview: a workflow state
+machine, eight metric tiles, the harness telemetry strip, a
+safety-regime card, the spec-tree, and a Recent Sessions feed. Use
+it to sanity-check that the project's data is coherent before
+drilling into details.
 
-## 4. Read the quality view
+For the full walkthrough, see
+[Reading the per-project dashboard](./guides/reading-the-per-project-dashboard.md).
 
-`/p/<slug>/quality` shows everything that needs human attention:
+## 4. Read the Quality Gates view
 
-- Lint failures against AIRGen QA rules
-- Requirements with no incoming or outgoing trace links (orphans)
-- Ambiguous or under-specified requirements
-- Whether the project meets the current quality gate
+`/p/<slug>/quality` shows the harness's machine-checkable
+thresholds that gate state-machine progression. When all gates
+pass, the autonomous loop can advance phases. When one fails, it
+halts until the underlying issue is fixed.
 
-This is where you decide whether the autonomous loop's most recent
-output is ready to ship, needs another iteration, or needs a directive.
+For details, see
+[The Quality Gates view](./guides/the-quality-view.md).
 
 ## 5. Drive the autonomous loop
 
 The autonomous loop is run by a Claude-driven orchestrator behind
-Derive (the Claude Harness). Derive exposes the controls in two
-Control Panels:
-
-- `/control` — global view: harness status and every project's row
-- `/p/<slug>/control` — per-project Control Panel
-
-The per-project Control Panel offers:
+Derive (the Claude Harness). Derive exposes the controls in the
+per-project Control Panel at `/p/<slug>/control`:
 
 - **STATUS** toggle (Active / Inactive) — whether the loop picks
   this project up.
@@ -73,6 +74,8 @@ The per-project Control Panel offers:
   state machine.
 - Email subscription form for session log notifications.
 - Activity audit feed.
+
+A global Control Panel at `/control` exists for tenant admins.
 
 For details, see
 [Driving the autonomous loop](./guides/driving-the-autonomous-loop.md).
@@ -89,18 +92,32 @@ Session Log (the nav-rail item is labelled "Log"; the route is still
 
 This is the human-readable narrative of what the loop did and why.
 
-## 7. Export an artefact bundle
+## 7. Export
 
-When you have a stable point — typically a baselined release — open
-**Artifacts** or **Downloads** on the project. You can export:
+When you need to share the project with someone outside Derive —
+a customer, regulator, or external review tool — open
+`/p/<slug>/downloads` (the **Downloads** tab in the rail). The
+Exports page offers:
 
-- Word and PDF reports
-- Excel exports of requirements
-- Zipped artefact bundles for delivery or audit
+- A **Complete Specification Bundle** (ZIP — cover letter, ISO
+  PDFs, Excel + ReqIF, engineering log)
+- **Full Project** as Excel, ReqIF, or PDF
+- **ISO 15289 Documents** per information item
+  (Concept of Operations / Requirements Specification / Design
+  Description / Verification Plan), each in `.md`, `.pdf`,
+  `.docx`, and `.json`
+- **Per Document** exports of individual requirement documents
+- The **Engineering Log** as markdown
+- An **Offline Library** for items saved for offline access
+
+For details, see
+[Exports and document bundles](./guides/exports-and-document-bundles.md).
 
 ## Next steps
 
-- _TODO: link to "Reading the per-project dashboard"_
-- _TODO: link to "The quality view: lint findings, orphans, gate state"_
-- _TODO: link to "Working with baselines and artefact bundles"_
-- _TODO: link to ecosystem overview_
+- [Reading the per-project dashboard](./guides/reading-the-per-project-dashboard.md)
+- [The Quality Gates view](./guides/the-quality-view.md)
+- [Driving the autonomous loop](./guides/driving-the-autonomous-loop.md)
+- [Exports and document bundles](./guides/exports-and-document-bundles.md)
+- [The public read-only demo](./guides/publishing-a-public-read-only-demo-project.md)
+- [Ecosystem overview](../ecosystem/overview.md)

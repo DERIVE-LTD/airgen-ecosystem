@@ -1,150 +1,149 @@
-# Publishing a public read-only demo project
+# The public read-only demo
 
 Derive's `/demo` route is a public, no-login-required view of a
-designated demo project. It is the simplest way to let prospective
+designated demo project. It's the simplest way to let prospective
 customers, conference attendees, or open-source visitors see the
 platform in action without provisioning accounts.
 
-This guide walks through choosing a good demo project, configuring
-it for public exposure, and the conventions that keep a demo useful
-without leaking sensitive data.
+This guide explains what the demo route does, what visitors can
+and can't do once they're on it, and how to keep the underlying
+demo project useful.
 
-> **Prerequisites:** admin role on the project you intend to expose,
-> and tenant admin role to enable the demo route. Demo projects are
-> exposed at `/demo` by default; they bypass auth for read-only
-> access.
+> **Note:** which project the demo route resolves to is configured
+> at deployment time, not via the user UI. The Settings page
+> available to operators surfaces only push-notification toggles
+> — there is no self-service "make this my demo project" affordance
+> at the time of writing.
 
-## What `/demo` shows
+## What `/demo` does
 
-A demo project surfaces:
+Visiting `https://derive.airgen.studio/demo` redirects an unauthenticated
+visitor to the configured demo project's Report view (e.g.
+`/p/<demo-slug>/report`) and signs them in as a synthetic
+`Demo User` with read-only access. From there they have the
+project nav rail with five tabs — **Dashboard**, **Artifacts**,
+**Report**, **Log**, **Downloads** — and can navigate freely
+between them.
 
-- The project dashboard.
-- The spec-tree.
-- The journal.
-- The quality view.
-- The report viewer.
-- All read-only tabs.
+The demo user does **not** see:
 
-It does **not** surface:
+- The **Control** tab. The autonomous loop is operator-only.
+- The **Sign out** behaves as expected, but signing back in
+  routes through the normal `/login` flow.
+- Any admin pages.
+- Any other project on the instance.
 
-- Loop controls (pause / unpause / directives).
-- Admin pages.
-- User management.
-- Sensitive configuration.
-- The authenticated REST API.
+A demo visitor can read the project, walk the spec-tree and
+diagrams, browse the Log, take screenshots, and pull exports from
+the Downloads page. They cannot author, modify, or drive the loop.
 
-Demo visitors see the project; they cannot interact with it.
+## Anatomy of a good demo project
 
-## 1. Pick a good demo project
-
-A useful demo project has:
+The demo project is the only thing visitors see, so make it the
+best it can be. A useful demo project has:
 
 - **Real-feeling content.** A toy project ("hello world") doesn't
-  show the platform's value. Choose something domain-rich.
+  show the platform's value. Pick a domain that's recognisable
+  but not real-customer.
 - **Sanitised content.** No customer names, no proprietary
-  technology, no internal IP. Build a fictional system from public
-  domain knowledge.
-- **A passing quality gate.** A messy demo undersells you.
-- **Recent autonomous-loop activity.** Visitors can read the journal
-  and see the autonomous loop in action.
-- **A safety regime.** Demonstrates the regime-aware features —
-  hazard analysis, verification matrix, gates.
+  technology, no internal IP. Build a fictional system from
+  public-domain knowledge.
+- **A complete decomposition.** STATUS `COMPLETE` looks better
+  than half-finished. A visitor reading a partial project will
+  assume the platform produces partial output.
+- **Recent autonomous-loop activity.** The Log should have
+  interesting entries close to today's date so the platform
+  reads as actively used.
+- **A safety regime, even a light one.** The SAFETY REGIME card
+  is a distinctive Derive feature — leaving it `NONE` undersells
+  the platform.
+- **A complete document set in Downloads.** Visitors who want
+  receipts will hit the Exports page — the Complete
+  Specification Bundle is the artefact most likely to be
+  downloaded by an evaluator.
 
-Existing projects in your tenant rarely meet all of these. Most
-demos benefit from a **purpose-built fictional project** whose only
-audience is demo visitors.
+A purpose-built fictional project usually beats reusing an
+existing one. Most real projects fail one of the criteria above.
 
-## 2. Build a sanitised demo project
+## Building a sanitised demo project
 
 A typical recipe:
 
-1. Pick a fictional system that's familiar enough to be obvious but
-   not so trivial it's boring. Real examples that work: a kids' RC
-   airplane, a fusion-reactor control system, a forward-deployed
-   medical device. Avoid: anything you actually work on.
-2. Create a new project (`airgen projects create <tenant>
+1. Pick a fictional system that's familiar enough to be obvious
+   but not so trivial it's boring. Real examples that work: a
+   kids' RC airplane, a fusion-reactor control system, a
+   forward-deployed medical device. Avoid: anything you actually
+   work on.
+2. Create the project (e.g. `airgen projects create <tenant>
    --name "RC Airplane Demo"`) and set the safety regime
    appropriately.
 3. Author 50–200 stakeholder + system requirements covering the
    golden path and a few hazards.
-4. Run the autonomous loop (a couple of decompose / validate
-   sessions) so the journal has interesting content.
-5. Polish to a green quality gate — orphans resolved, lint clean,
-   verification activities present.
-6. Create an initial baseline (`v1.0`) so visitors can see baseline
-   diffs.
+4. Run the autonomous loop (a couple of decompose / validate /
+   review sessions) so the journal has substantive content.
+5. Polish: orphans resolved, lint clean, verification activities
+   present, dashboard tiles non-zero.
+6. Pre-generate the Complete Specification Bundle by visiting the
+   Downloads page once — the bundle is then cached for the next
+   visitor.
 
-A good demo project takes about a day to build and lasts for years.
+A good demo project takes about a day to build and lasts for
+years.
 
-## 3. Mark the project as the demo project
+## Verifying the public surface
 
-The demo route exposes one designated project. To mark a project
-as the demo:
+After any change to the demo project, open `/demo` from a private
+browser window and confirm:
 
-- **Tenant admin → Settings → Public demo project** (or equivalent
-  in your version) — pick the project from a dropdown.
-
-Some Derive deployments allow multiple demo projects (with the
-`/demo` route showing a chooser). If yours does, surface the cleanest
-one as the default.
-
-## 4. Verify the public surface
-
-Open `/demo` from a private browser window (no auth). Confirm:
-
-- The dashboard loads and shows reasonable metrics.
+- The dashboard loads with reasonable metrics.
 - The spec-tree renders.
-- The journal shows recent entries (and they read well — no leaked
+- The Log shows recent entries that read well (no leaked
   customer names!).
-- The quality view is green.
-- The report viewer renders the project report.
-- Attempting any write action (or visiting `/p/<slug>/control`) is
-  either blocked or redirects to login.
+- The Report view renders and is readable end-to-end.
+- The Downloads page generates its bundles successfully.
+- Attempting any write action (e.g. visiting `/p/<slug>/control`)
+  is blocked or redirects.
 
 If you find anything sensitive on the public surface, fix it and
 re-verify.
 
-## 5. Embed in your marketing
+## Linking to the demo
 
 Once `/demo` is solid, link it from:
 
 - The Derive Ltd marketing site
   ([derive-ltd.co.uk](https://derive-ltd.co.uk)).
 - Conference talks and slide decks.
-- The repo README of your demo or example projects.
-- LinkedIn posts and blog articles about the platform.
+- Repo READMEs that reference Derive.
+- Posts and blog articles about the platform.
 
 A direct link to `https://derive.airgen.studio/demo` lets readers
 immediately see what you're describing.
 
-## 6. Maintain the demo
+## Keeping the demo fresh
 
 A stale demo undersells the platform. A maintenance cadence:
 
 - **Weekly.** Run an autonomous-loop session against the demo
-  project so the journal stays fresh.
-- **Monthly.** Add a new requirement or two, re-baseline if
-  meaningful.
-- **Quarterly.** Refresh the demo's README / talking points to
-  match new platform features.
-- **At releases.** Make sure the demo highlights the most recent
-  Derive feature additions.
+  project so the Log and dashboard stay current.
+- **Monthly.** Add a new requirement or two; pre-generate the
+  Complete Specification Bundle on the Downloads page.
+- **Quarterly.** Refresh talking points to match new platform
+  features.
+- **At Derive releases.** Walk the demo through every public
+  route — if anything's broken, this is what visitors will see
+  first.
 
-## Demo-as-test pattern
+## Demo-as-test
 
 A useful side benefit: the demo project doubles as an integration
-test for new Derive releases. Before a Derive deploy:
-
-1. Run the demo through every public route in a private browser.
-2. Run the demo through every authenticated route as an admin.
-3. Trigger a fresh autonomous-loop session.
-4. Check the dashboard, quality view, journal, baselines.
-
-If anything's broken, the demo is the first thing visitors see — so
-catching it before deploy is doubly important.
+test for new Derive releases. Before a deploy, walk the demo as a
+visitor (private browser → `/demo`) and as an operator (signed in
+to the same project). Catching breakage on the demo is doubly
+important because it's the platform's public face.
 
 ## What's next
 
-- [Managing per-project roles and user access](./managing-per-project-roles-and-user-access.md)
 - [Reading the per-project dashboard](./reading-the-per-project-dashboard.md)
-- [Working with baselines and artefact bundles](./working-with-baselines-and-artefact-bundles.md)
+- [Exports and document bundles](./exports-and-document-bundles.md)
+- [Driving the autonomous loop](./driving-the-autonomous-loop.md)

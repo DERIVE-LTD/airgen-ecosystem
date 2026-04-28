@@ -9,6 +9,7 @@ spec-tree dashboard, session journal, quality view, report viewer, and
 controls for the autonomous loop driven by the Claude Harness.
 
 - **Hosted:** [derive.airgen.studio](https://derive.airgen.studio)
+- **Public demo:** [derive.airgen.studio/demo](https://derive.airgen.studio/demo)
 - **Stack:** SvelteKit 2 on Svelte 5 (runes), Vite 7, Tailwind 4,
   GitHub / Google OAuth (arctic + oslo), PWA via `@vite-pwa/sveltekit`,
   client-side IndexedDB persistence, web-push notifications
@@ -25,9 +26,9 @@ turns that data into something an engineer can drive.
 | Report viewer               | Long-form generated System Decomposition Report rendered inline.                 |
 | Session Log                 | Per-project and cross-project session-log feed (URL `/journal`, UI label "Log"). |
 | Control Panel               | STATUS / MODE / WORKFLOW selectors, three directive buttons (Resume, Run Now, Force QC), manual phase stepping, email subscriptions, activity audit. |
-| Artefacts and downloads     | Word, PDF, Excel exports; baseline bundles.                                      |
+| Artifacts                   | Project content browser — requirements, documents, diagrams, traces, orphans.    |
+| Downloads / Exports         | ZIP bundles, ISO 15289 documents (Word/PDF/JSON/Markdown), Excel + ReqIF exports, engineering-log markdown, offline library. |
 | Public demo                 | `/demo` route for evaluation (resolves to a designated demo project).            |
-| Admin                       | Project and user management, per-project roles, analytics.                       |
 | OAuth + PWA                 | GitHub and Google sign-in; installable as a PWA with push notifications.         |
 
 ## Data sources
@@ -44,17 +45,18 @@ turns that data into something an engineer can drive.
 ```
 src/routes/
 ├── /                      Landing
-├── /admin/                Admin tools (project/user management, analytics)
+├── /admin/                Admin tools (admin-only; non-admins receive 403)
 ├── /auth/                 OAuth + session
-├── /control/              Global Control Panel — harness status, all projects
+├── /control/              Global Control Panel (admin-only)
 ├── /demo/                 Public demo route — resolves to a designated project
 ├── /journal/              Cross-project session-log feed (UI label "Log")
 ├── /login/                Sign-in
+├── /settings/             Per-user settings (notifications)
 └── /p/[slug]/             Per-project workspace
-    ├── artifacts/         Generated artefacts (Word/PDF, baselines)
+    ├── artifacts/         Content browser (requirements, documents, diagrams, traces)
     ├── control/           Per-project Control Panel
     ├── dashboard/         Project overview — workflow, metrics, harness, regime, spec-tree
-    ├── downloads/         Bundle/PDF/Excel exports
+    ├── downloads/         Exports — bundles, ISO 15289 documents, Excel/ReqIF/PDF
     ├── init/              Bootstrap a fresh project
     ├── journal/           Per-project Session Log (UI label "Log")
     ├── quality/           Quality Gates — harness gate state (not in nav rail)
@@ -64,7 +66,8 @@ src/routes/
 Per-project navigation rail items: **Dashboard**, **Artifacts**,
 **Report**, **Log** (which routes to `/journal`), **Control**,
 **Downloads**. The `/quality` and `/init` routes are reachable by
-direct URL but are not surfaced in the rail.
+direct URL but are not surfaced in the rail. Demo / read-only users
+do not see the **Control** tab.
 
 ## Guides
 
@@ -77,6 +80,5 @@ In-depth guides:
 - [Reading the per-project dashboard and spec-tree](./guides/reading-the-per-project-dashboard.md)
 - [The Quality Gates view](./guides/the-quality-view.md)
 - [Driving the autonomous loop: STATUS, MODE, and directives](./guides/driving-the-autonomous-loop.md)
-- [Working with baselines and artefact bundles](./guides/working-with-baselines-and-artefact-bundles.md)
-- [Managing per-project roles and user access](./guides/managing-per-project-roles-and-user-access.md)
-- [Publishing a public read-only demo project](./guides/publishing-a-public-read-only-demo-project.md)
+- [Exports and document bundles](./guides/exports-and-document-bundles.md)
+- [The public read-only demo](./guides/publishing-a-public-read-only-demo-project.md)

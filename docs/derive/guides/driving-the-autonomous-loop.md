@@ -250,5 +250,5 @@ Strategies for keeping spend in line:
 ## What's next
 
 - [Reading session journals](../../claude-harness/guides/reading-session-journals.md)
-- [Working with baselines and artefact bundles](./working-with-baselines-and-artefact-bundles.md)
+- [Exports and document bundles](./exports-and-document-bundles.md)
 - [The Quality Gates view](./the-quality-view.md)
