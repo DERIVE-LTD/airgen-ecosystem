@@ -27,6 +27,7 @@ knowledge graph that holds entities and facts (`PART_OF`, `SPEC_TREE`,
 | Inference                   | Property inference from classification via trait axioms.                      |
 | Fact store                  | Subject-predicate-object facts, scoped by namespace.                          |
 | Reconciliation              | Cross-check substrate facts against AIRGen trace links.                       |
+| Entity lifecycle            | Update, reclassify, merge, history, and namespace-deduplicate operations on entities. |
 | Three interfaces            | MCP server (for AI agents), REST API (for apps), CLI (for terminals).         |
 
 ## The 32-bit taxonomy
@@ -52,10 +53,21 @@ npm install -g @derive-ltd/uht-substrate
 uht-substrate config set api-url https://substrate.universalhex.org/api
 uht-substrate config set token YOUR_TOKEN
 
+# Classification & search
 uht-substrate classify "hammer" --format pretty
 uht-substrate compare hammer screwdriver
 uht-substrate search "hand tools" --limit 10
+
+# Facts
 uht-substrate facts store "spark plug" PART_OF "engine" --namespace SE:automotive
+uht-substrate facts reconcile --namespace SE:automotive
+
+# Entity lifecycle
+uht-substrate entities update "spark plug" --description "Ignition component"
+uht-substrate entities reclassify "spark plug" --context "internal combustion engine"
+uht-substrate entities merge "old name" "canonical name"
+uht-substrate entities history "spark plug"
+uht-substrate entities deduplicate --namespace SE:automotive
 ```
 
 ### REST API
@@ -96,5 +108,6 @@ Planned topics:
 - Classifying entities for a new project
 - Storing and querying facts with namespace scoping
 - Reconciling substrate facts against AIRGen trace links
+- Entity lifecycle: reclassify, merge, history, deduplicate
 - Connecting the substrate MCP server to Claude Desktop
 - Self-hosting UHT Substrate with Neo4j

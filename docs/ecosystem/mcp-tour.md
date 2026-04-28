@@ -96,6 +96,23 @@ Required environment:
 The `-p @derive-ltd/airgen-cli airgen-mcp` form tells `npx` to install
 the CLI package and run its second bin (the MCP server, not the CLI).
 
+#### HTTP transport — for the Claude.ai connector
+
+`airgen-mcp` defaults to stdio. Set `MCP_PORT` and it runs an HTTP
+transport on that port instead — the form expected by the Claude.ai
+web app's connector setting.
+
+```sh
+MCP_PORT=3100 \
+AIRGEN_API_URL=https://api.airgen.studio/api \
+AIRGEN_API_KEY=ak_... \
+airgen-mcp
+```
+
+You can then add `http://your-host:3100/mcp` (or your hosted URL) as
+a connector in Claude.ai. For production deployments, front it with a
+TLS-terminating reverse proxy and require authentication.
+
 ### UHT Substrate — hosted HTTP endpoint
 
 UHT Substrate exposes a hosted MCP endpoint at
