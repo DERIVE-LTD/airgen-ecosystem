@@ -28,7 +28,10 @@ infrastructure layers:
 | **UHT Substrate** | Semantic-reasoning engine and namespaced fact store — the project knowledge graph.         | [substrate.universalhex.org](https://substrate.universalhex.org)   | [`docs/uht-substrate/`](docs/uht-substrate/)         |
 | **Claude Harness** | Autonomous Claude Code session orchestrator — runs the loop behind Derive. _(Source private.)_ | _(internal)_                                                       | [`docs/claude-harness/`](docs/claude-harness/)       |
 
-For how the five fit together, see the [ecosystem overview](docs/ecosystem/overview.md).
+For how the five fit together, see the
+[ecosystem overview](docs/ecosystem/overview.md). For an interactive
+tour from inside Claude Desktop, see
+[ten things to ask Claude about your projects](docs/ecosystem/mcp-tour.md).
 
 ## Repository layout
 

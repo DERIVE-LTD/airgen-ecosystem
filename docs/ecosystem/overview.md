@@ -177,3 +177,5 @@ to discuss your environment.
 - [Reify documentation](../reify/)
 - [UHT Substrate documentation](../uht-substrate/)
 - [Claude Harness documentation](../claude-harness/)
+- [Ten things to ask Claude about your projects](./mcp-tour.md) — a
+  guided MCP tour across all three MCP-enabled components
