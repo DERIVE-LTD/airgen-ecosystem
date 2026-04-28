@@ -76,7 +76,6 @@ If your project also uses AIRGen, you can cross-check substrate facts
 against AIRGen trace links to find inconsistencies between the two:
 
 ```sh
-# (CLI tool: facts reconcile — confirm exact name in your CLI version)
 uht-substrate facts reconcile --namespace SE:my-project
 ```
 

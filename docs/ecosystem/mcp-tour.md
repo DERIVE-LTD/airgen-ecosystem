@@ -46,9 +46,30 @@ Token generation is described in the [Reify docs](../reify/).
 
 ### AIRGen — `@derive-ltd/airgen-cli`
 
-As of v1.1.0 (April 2026), `@derive-ltd/airgen-cli` bundles the
-AIRGen MCP server alongside the CLI. The MCP server lives at the
-`airgen-mcp` bin:
+Since v1.1.0 (April 2026), `@derive-ltd/airgen-cli` bundles the
+AIRGen MCP server alongside the CLI. The MCP server is the
+`airgen-mcp` bin and runs over stdio by default (or HTTP if
+`MCP_PORT` is set, for the Claude.ai connector).
+
+After a global install (`npm install -g @derive-ltd/airgen-cli`),
+the simplest config is:
+
+```json
+{
+  "mcpServers": {
+    "airgen": {
+      "command": "airgen-mcp",
+      "env": {
+        "AIRGEN_API_URL": "https://api.airgen.studio/api",
+        "AIRGEN_API_KEY": "ak_paste_your_key_here"
+      }
+    }
+  }
+}
+```
+
+If you'd rather avoid a global install and let Claude Desktop
+fetch the package on demand, use the npx form:
 
 ```json
 {
@@ -58,7 +79,7 @@ AIRGen MCP server alongside the CLI. The MCP server lives at the
       "args": ["-y", "-p", "@derive-ltd/airgen-cli", "airgen-mcp"],
       "env": {
         "AIRGEN_API_URL": "https://api.airgen.studio/api",
-        "AIRGEN_API_KEY": "your-airgen-api-key"
+        "AIRGEN_API_KEY": "ak_paste_your_key_here"
       }
     }
   }
@@ -69,11 +90,11 @@ Required environment:
 
 - `AIRGEN_API_URL` — base URL. Note the `api.` subdomain in production
   (`https://api.airgen.studio/api`).
-- Either `AIRGEN_API_KEY` (preferred) or `AIRGEN_EMAIL` +
+- Either `AIRGEN_API_KEY` (`ak_...`, preferred) or `AIRGEN_EMAIL` +
   `AIRGEN_PASSWORD` for password-based login.
 
-The `-p @derive-ltd/airgen-cli airgen-mcp` form tells `npx` to
-install the CLI package and run its second bin.
+The `-p @derive-ltd/airgen-cli airgen-mcp` form tells `npx` to install
+the CLI package and run its second bin (the MCP server, not the CLI).
 
 ### UHT Substrate — hosted HTTP endpoint
 

@@ -11,9 +11,9 @@ pages. This page is an install-and-go reference.
 
 | Package                                                                                       | Latest | Pairs with                            | Ships a CLI | Ships an MCP server         |
 | --------------------------------------------------------------------------------------------- | ------ | ------------------------------------- | ----------- | --------------------------- |
-| [`@derive-ltd/airgen-cli`](https://www.npmjs.com/package/@derive-ltd/airgen-cli)             | 1.1.0  | [AIRGen](../airgen/)                  | ✓ `airgen`  | ✓ `airgen-mcp` (since 1.1.0) |
-| [`@derive-ltd/reify`](https://www.npmjs.com/package/@derive-ltd/reify)                       | 1.1.0  | [Reify](../reify/)                    | ✓ `reify`   | ✓ `reify-mcp`               |
-| [`@derive-ltd/uht-substrate`](https://www.npmjs.com/package/@derive-ltd/uht-substrate)       | 1.0.2  | [UHT Substrate](../uht-substrate/)    | ✓ `uht-substrate` | — _(MCP is hosted; see below)_ |
+| [`@derive-ltd/airgen-cli`](https://www.npmjs.com/package/@derive-ltd/airgen-cli)             | 1.1.1  | [AIRGen](../airgen/)                  | ✓ `airgen`  | ✓ `airgen-mcp` (since 1.1.0) |
+| [`@derive-ltd/reify`](https://www.npmjs.com/package/@derive-ltd/reify)                       | 1.1.1  | [Reify](../reify/)                    | ✓ `reify`   | ✓ `reify-mcp`               |
+| [`@derive-ltd/uht-substrate`](https://www.npmjs.com/package/@derive-ltd/uht-substrate)       | 1.0.3  | [UHT Substrate](../uht-substrate/)    | ✓ `uht-substrate` | — _(MCP is hosted; see below)_ |
 
 The legacy unscoped names (`airgen-cli`, `uht-substrate`, `reify-mcp`)
 remain on npm but are no longer maintained — use the `@derive-ltd`
@@ -85,6 +85,7 @@ uht-substrate config set token <your-token>
 uht-substrate classify hammer --format pretty
 uht-substrate compare hammer screwdriver
 uht-substrate facts store "spark plug" PART_OF "engine" --namespace SE:automotive
+uht-substrate facts reconcile --namespace SE:my-project   # cross-check vs AIRGen
 uht-substrate impact --airgen-diff diff.json --format pretty
 ```
 
