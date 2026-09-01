@@ -109,10 +109,11 @@ its public-facing role within the ecosystem.
 ### Derive — operator workbench
 
 Derive is the cockpit. It does not own data — it reads from AIRGen,
-UHT Substrate, SurrealDB (for harness state), and the journal
+UHT Substrate, the harness control plane (for harness state, which is
+file-backed), and the journal
 filesystem, and presents a per-project workspace: spec-tree dashboard,
 session journal, quality view, report viewer, baseline and artefact
-exports, and the controls (`/control`, `/p/<slug>/control`) for
+exports, and the controls (`/control`, `/projects/<slug>/control`) for
 pausing, unpausing, and directing the harness loop.
 
 The human-in-the-loop gate is intentional. In regulated contexts,
@@ -136,7 +137,7 @@ visualisation.
 | ------------------------------ | -------------------------------------------------------------------------- |
 | Harness ↔ AIRGen              | AIRGen REST API — the harness writes requirements and trace links.         |
 | Harness ↔ UHT Substrate       | Substrate REST / MCP — the harness writes namespaced facts.                |
-| Harness ↔ Derive              | The harness writes journal markdown and SurrealDB session records that Derive reads. The harness has **no direct UI** — Derive is the operator interface. |
+| Harness ↔ Derive              | The harness writes journal markdown and exposes session/state records over its HTTP control plane (file-backed) that Derive reads. The harness has **no direct UI** — Derive is the operator interface. |
 | Derive ↔ AIRGen               | AIRGen REST API for projects, requirements, baselines.                     |
 | Derive ↔ UHT Substrate        | Substrate REST API for the spec-tree and namespace queries.                |
 | Reify ↔ AIRGen                | Reify reads requirements and trace links via the AIRGen REST API.          |

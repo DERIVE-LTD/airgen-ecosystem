@@ -24,7 +24,7 @@ review.
 | State machine                | Each session is a state machine — well-defined transitions, retries, and gates. |
 | Writes upstream              | Produces AIRGen requirements + trace links and UHT Substrate facts per session. |
 | Journal output               | Each session writes a markdown post that Derive renders.                      |
-| Driven from Derive           | Derive's `/control` and `/p/<slug>/control` panels pause, unpause, and direct the loop. |
+| Driven from Derive           | Derive's `/control` and `/projects/<slug>/control` panels pause, unpause, and direct the loop. |
 
 ## Role in the ecosystem
 

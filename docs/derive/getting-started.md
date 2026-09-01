@@ -63,7 +63,7 @@ For details, see
 
 The autonomous loop is run by a Claude-driven orchestrator behind
 Derive (the Claude Harness). Derive exposes the controls in the
-per-project Control Panel at `/p/<slug>/control`:
+per-project Control Panel at `/projects/<slug>/control`:
 
 - **STATUS** toggle (Active / Inactive) — whether the loop picks
   this project up.

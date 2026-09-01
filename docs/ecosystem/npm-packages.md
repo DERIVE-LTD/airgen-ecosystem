@@ -37,7 +37,7 @@ All three target Node.js ≥ 18, ship as ESM, and are MIT-licensed.
 
 | Package                       | Env vars                                                               | Config file       | Notes                                                                 |
 | ----------------------------- | ---------------------------------------------------------------------- | ----------------- | --------------------------------------------------------------------- |
-| `@derive-ltd/airgen-cli`      | `AIRGEN_API_URL`, `AIRGEN_API_KEY` _(or `AIRGEN_EMAIL` + `AIRGEN_PASSWORD`)_, `UHT_API_KEY` _(for semantic lint)_ | `~/.airgenrc`     | API URL is `https://api.airgen.studio/api` in production.             |
+| `@derive-ltd/airgen-cli`      | `AIRGEN_API_URL`, `AIRGEN_API_KEY` _(or `AIRGEN_EMAIL` + `AIRGEN_PASSWORD`)_, `UHT_API_KEY` _(for semantic lint)_ | `~/.airgenrc`     | API URL is `https://api.app.derive-ltd.co.uk/api` in production.             |
 | `@derive-ltd/reify`           | `REIFY_API_URL`, `REIFY_API_TOKEN`                                     | —                 | Tokens are generated server-side; the plaintext is shown once.        |
 | `@derive-ltd/uht-substrate`   | `UHT_API_URL`, `UHT_TOKEN` _(or `UHT_API_KEY`)_                       | `uht-substrate config set …` | OAuth-issued token via the substrate web UI.                          |
 
@@ -61,7 +61,7 @@ Append `--json` to any command for machine-readable output.
 ### `@derive-ltd/reify` — SysML model exploration
 
 ```sh
-export REIFY_API_URL=https://reify.airgen.studio
+export REIFY_API_URL=https://reify.app.derive-ltd.co.uk
 export REIFY_API_TOKEN=rfy_...
 
 reify list-projects

@@ -11,7 +11,7 @@ actually use, with the conventions that make scripting against
 AIRGen pleasant.
 
 > **Prerequisites:** Node.js ≥ 18. An AIRGen account (or a
-> self-hosted instance) and either an API key (`ak_...`) or
+> self-hosted instance) and either an API key (`airk_...`) or
 > email + password.
 
 ## Install
@@ -38,7 +38,7 @@ Pick whichever style fits your workflow.
 
 ```sh
 export AIRGEN_API_URL=https://api.airgen.studio/api
-export AIRGEN_API_KEY=ak_...                # preferred
+export AIRGEN_API_KEY=airk_...                # preferred
 # or:
 export AIRGEN_EMAIL=you@example.com
 export AIRGEN_PASSWORD=your-password

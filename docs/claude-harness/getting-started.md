@@ -25,7 +25,7 @@ per-turn human prompts.
 From Derive, the loop is controlled by:
 
 - **`/control`** — global controls across all projects
-- **`/p/<slug>/control`** — controls scoped to one project
+- **`/projects/<slug>/control`** — controls scoped to one project
 
 Use these to pause the loop while you review output, submit a
 **directive** (a free-text instruction the loop will incorporate), or

@@ -1,21 +1,58 @@
 # Ten things to ask Claude about your projects
 
-A guided tour of the AIRGen ecosystem from inside Claude Desktop. Three
-of the five components — **AIRGen**, **Reify**, and **UHT Substrate** —
-each expose an MCP server. Wire all three into Claude and you get an
-interactive surface across requirements, traceability, the SysML
-model, and the underlying knowledge graph.
+A guided tour of the AIRGen ecosystem from inside Claude Desktop.
+The platform exposes a single **unified MCP gateway** hosted on
+Reify's origin that covers all four surfaces — Reify (SysML / views
+/ workspace), AIRGen (requirements / hazards / trace / baselines),
+Derive (autonomous-loop control plane + journal), and the local
+UHT Substrate replica.
 
-This page walks through ten concrete prompts. Each one names the MCP
-servers and tools it touches so you can see what's happening
-underneath.
+This page walks through ten concrete prompts. Each one names the
+tools it touches so you can see what's happening underneath.
 
-> **Audience:** anyone using Claude Desktop (or another MCP client) who
-> wants to interact with their AIRGen / Derive / Reify projects without
-> opening the browser. Operators still drive the autonomous loop from
-> [Derive](../derive/) — that part has no MCP surface.
+> **Audience:** anyone using Claude Desktop (or another MCP client)
+> who wants to interact with their AIRGen / Derive / Reify projects
+> without opening the browser. Operators still drive the autonomous
+> loop from [Derive](../derive/) — the gateway exposes READ access
+> to its state; mutations go through the UI or CLI.
 
-## Setup — wire the three MCP servers into Claude Desktop
+## Setup — unified connector (recommended)
+
+The simplest way to wire all four surfaces into Claude Desktop is
+the unified MCP gateway at `https://reify.app.derive-ltd.co.uk/mcp`.
+One OAuth dynamic-client-registration handshake gives you ~40
+read-only tools across the platform.
+
+In Claude Desktop's connector UI:
+
+1. Click **Connectors** → **Add custom connector**.
+2. Enter `https://reify.app.derive-ltd.co.uk/mcp` as the connector URL.
+3. Claude Desktop discovers OAuth metadata at
+   `/.well-known/oauth-protected-resource/mcp`, prompts you to sign
+   in. The browser opens Reify's `/authorize` page; the existing
+   Reify / Derive login validates you.
+4. Token is bound to your tenant; access to individual projects is
+   filtered by Reify's `canAccessProject` (same rules the web UI
+   uses).
+
+The gateway exposes four tool groups:
+
+| Group | Prefix | What it gives you |
+|-------|--------|-------------------|
+| Reify | `reify_*` | SysML inspection, diagram render, traceability, workspace state |
+| AIRGen | `airgen_*` | Read paths for requirements, hazards, trace links, baselines, diagrams, activity, reports |
+| Derive | `derive_*` | Autonomous-loop harness state, per-project settings (mode/template), journal entries, bundle freshness |
+| Substrate | `substrate_*` | Classify, query facts, list entities, compare, search — backed by the local `uht-substrate-node` replica |
+
+**Write access deliberately omitted.** The gateway is read-only;
+writes still go through the AIRGen CLI / web UI / autonomous loop.
+
+The legacy three-connector setup below remains useful for power
+users who want stdio transport (faster startup, no network round-
+trip) or who want to script against a long-lived API key without
+the OAuth dance.
+
+## Setup — three separate MCP servers (advanced / stdio)
 
 Two of the three components ship as `npx`-installable packages on
 npm; UHT Substrate is reached over HTTP at the hosted endpoint. Add
@@ -32,7 +69,7 @@ macOS, `%APPDATA%\Claude\claude_desktop_config.json` on Windows).
       "command": "npx",
       "args": ["-y", "@derive-ltd/reify"],
       "env": {
-        "REIFY_API_URL": "https://reify.airgen.studio",
+        "REIFY_API_URL": "https://reify.app.derive-ltd.co.uk",
         "REIFY_API_TOKEN": "rfy_paste_your_token_here"
       }
     }
@@ -60,8 +97,8 @@ the simplest config is:
     "airgen": {
       "command": "airgen-mcp",
       "env": {
-        "AIRGEN_API_URL": "https://api.airgen.studio/api",
-        "AIRGEN_API_KEY": "ak_paste_your_key_here"
+        "AIRGEN_API_URL": "https://api.app.derive-ltd.co.uk/api",
+        "AIRGEN_API_KEY": "airk_paste_your_key_here"
       }
     }
   }
@@ -78,8 +115,8 @@ fetch the package on demand, use the npx form:
       "command": "npx",
       "args": ["-y", "-p", "@derive-ltd/airgen-cli", "airgen-mcp"],
       "env": {
-        "AIRGEN_API_URL": "https://api.airgen.studio/api",
-        "AIRGEN_API_KEY": "ak_paste_your_key_here"
+        "AIRGEN_API_URL": "https://api.app.derive-ltd.co.uk/api",
+        "AIRGEN_API_KEY": "airk_paste_your_key_here"
       }
     }
   }
@@ -89,8 +126,8 @@ fetch the package on demand, use the npx form:
 Required environment:
 
 - `AIRGEN_API_URL` — base URL. Note the `api.` subdomain in production
-  (`https://api.airgen.studio/api`).
-- Either `AIRGEN_API_KEY` (`ak_...`, preferred) or `AIRGEN_EMAIL` +
+  (`https://api.app.derive-ltd.co.uk/api`).
+- Either `AIRGEN_API_KEY` (`airk_...`, preferred) or `AIRGEN_EMAIL` +
   `AIRGEN_PASSWORD` for password-based login.
 
 The `-p @derive-ltd/airgen-cli airgen-mcp` form tells `npx` to install
@@ -104,8 +141,8 @@ web app's connector setting.
 
 ```sh
 MCP_PORT=3100 \
-AIRGEN_API_URL=https://api.airgen.studio/api \
-AIRGEN_API_KEY=ak_... \
+AIRGEN_API_URL=https://api.app.derive-ltd.co.uk/api \
+AIRGEN_API_KEY=airk_... \
 airgen-mcp
 ```
 

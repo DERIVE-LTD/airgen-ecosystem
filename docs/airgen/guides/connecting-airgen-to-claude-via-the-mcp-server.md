@@ -11,7 +11,7 @@ confirm everything is wired correctly.
 > **Prerequisites:**
 >
 > - `@derive-ltd/airgen-cli` 1.1.0 or later installed.
-> - An AIRGen API key (`ak_...`) or email + password.
+> - An AIRGen API key (`airk_...`) or email + password.
 > - Claude Desktop 0.7+ (or any MCP-capable client).
 
 ## Install
@@ -42,7 +42,7 @@ Add the AIRGen entry:
       "command": "airgen-mcp",
       "env": {
         "AIRGEN_API_URL": "https://api.airgen.studio/api",
-        "AIRGEN_API_KEY": "ak_paste_your_key_here"
+        "AIRGEN_API_KEY": "airk_paste_your_key_here"
       }
     }
   }
@@ -71,7 +71,7 @@ HTTP server. Set `MCP_PORT` and the server switches transports:
 ```sh
 MCP_PORT=3100 \
 AIRGEN_API_URL=https://api.airgen.studio/api \
-AIRGEN_API_KEY=ak_... \
+AIRGEN_API_KEY=airk_... \
 airgen-mcp
 ```
 
@@ -94,7 +94,7 @@ mcp.example.com {
 | Variable             | Required | Notes                                                            |
 | -------------------- | -------- | ---------------------------------------------------------------- |
 | `AIRGEN_API_URL`     | yes      | Base URL — `https://api.airgen.studio/api` in production. The `api.` subdomain is required. |
-| `AIRGEN_API_KEY`     | yes*     | Bearer-style key starting `ak_...`. Preferred over login.        |
+| `AIRGEN_API_KEY`     | yes*     | Bearer-style key starting `airk_...`. Preferred over login.        |
 | `AIRGEN_EMAIL`       | yes*     | If `AIRGEN_API_KEY` is not set.                                  |
 | `AIRGEN_PASSWORD`    | yes*     | If `AIRGEN_API_KEY` is not set.                                  |
 | `MCP_PORT`           | no       | Set to switch from stdio to HTTP transport.                      |
